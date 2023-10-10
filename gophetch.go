@@ -44,8 +44,8 @@ func New(fetchers ...fetchers.HTMLFetcher) *Gophetch {
 	return g
 }
 
-func (g *Gophetch) FetchAndExtractFromReader(r io.Reader) (FetchedData, error) {
-	err := g.Parser.Parse(r, nil)
+func (g *Gophetch) FetchAndExtractFromReader(r io.Reader, targetURL string) (FetchedData, error) {
+	err := g.Parser.Parse(r, nil, targetURL)
 	if err != nil {
 		return FetchedData{
 			HTMLNode:   g.Parser.Node(),
@@ -66,7 +66,7 @@ func (g *Gophetch) FetchAndExtractFromReader(r io.Reader) (FetchedData, error) {
 		StatusCode: 0,
 	}
 
-	data, err := g.Extractor.ExtractMetadata(g.Parser.Node())
+	data, err := g.Extractor.ExtractMetadata(g.Parser.Node(), g.Parser.URL())
 	if err != nil {
 		return fetchedData, err
 	}
@@ -76,7 +76,7 @@ func (g *Gophetch) FetchAndExtractFromReader(r io.Reader) (FetchedData, error) {
 }
 
 // FetchAndExtractFromURL fetches and extracts data from a URL using the available fetchers
-func (g *Gophetch) FetchAndExtractFromURL(url string) (FetchedData, error) {
+func (g *Gophetch) FetchAndExtractFromURL(targetURL string) (FetchedData, error) {
 	var body io.ReadCloser
 	var resp *http.Response
 	var err error
@@ -89,7 +89,7 @@ func (g *Gophetch) FetchAndExtractFromURL(url string) (FetchedData, error) {
 	var data metadata.Metadata
 	hasData := false
 	for _, fetcher := range g.Fetchers {
-		resp, body, err = fetcher.FetchHTML(url)
+		resp, body, err = fetcher.FetchHTML(targetURL)
 		if err == nil {
 			data = fetcher.Metadata()
 			hasData = fetcher.HasMetadata()
@@ -100,14 +100,14 @@ func (g *Gophetch) FetchAndExtractFromURL(url string) (FetchedData, error) {
 	if err != nil {
 		return FetchedData{}, err
 	} else if resp == nil || body == nil {
-		return FetchedData{}, fmt.Errorf("unable to fetch HTML from %s", url)
+		return FetchedData{}, fmt.Errorf("unable to fetch HTML from %s", targetURL)
 	}
 
 	defer func(body io.ReadCloser) {
 		_ = body.Close()
 	}(body)
 
-	err = g.Parser.Parse(body, resp)
+	err = g.Parser.Parse(body, resp, targetURL)
 	if err != nil {
 		return FetchedData{}, err
 	}
@@ -128,7 +128,7 @@ func (g *Gophetch) FetchAndExtractFromURL(url string) (FetchedData, error) {
 		return fetchedData, nil
 	}
 
-	domain, err := ExtractDomain(url)
+	domain, err := ExtractDomain(targetURL)
 	if err != nil {
 		return fetchedData, err
 	}
@@ -137,7 +137,7 @@ func (g *Gophetch) FetchAndExtractFromURL(url string) (FetchedData, error) {
 		g.Extractor.ApplySiteSpecificRules(site)
 	}
 
-	data, err = g.Extractor.ExtractMetadata(g.Parser.Node())
+	data, err = g.Extractor.ExtractMetadata(g.Parser.Node(), g.Parser.URL())
 
 	if err != nil {
 		return fetchedData, err

@@ -4,6 +4,8 @@ import (
 	"io"
 	"net/http"
 	"net/url"
+
+	"github.com/pixiesys/gophetch/metadata"
 )
 
 // ProxyHTTPFetcher is a fetcher that uses a proxy to fetch HTML from a URL.
@@ -28,4 +30,12 @@ func (p *ProxyHTTPFetcher) FetchHTML(targetURL string) (io.ReadCloser, error) {
 	}
 
 	return resp.Body, nil
+}
+
+func (p *ProxyHTTPFetcher) HasMetadata() bool {
+	return false
+}
+
+func (p *ProxyHTTPFetcher) Metadata() metadata.Metadata {
+	return metadata.Metadata{}
 }

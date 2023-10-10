@@ -67,14 +67,17 @@ func main() {
 		APIKey: cfg.ScrapingFishAPIKey,
 	}
 
+	allow := false
 	var htmlFetchers []fetchers.HTMLFetcher
 
-	if cfg.MicrolinkAPIKey != "" {
-		htmlFetchers = append(htmlFetchers, microLinkFetcher)
-	}
+	if allow {
+		if cfg.ScrapingFishAPIKey != "" {
+			htmlFetchers = append(htmlFetchers, scrapingfishFetcher)
+		}
 
-	if cfg.ScrapingFishAPIKey != "" {
-		htmlFetchers = append(htmlFetchers, scrapingfishFetcher)
+		if cfg.MicrolinkAPIKey != "" {
+			htmlFetchers = append(htmlFetchers, microLinkFetcher)
+		}
 	}
 
 	// Add the standard fetcher last
@@ -121,6 +124,8 @@ func printMetadata(metadata metadata.Metadata) {
 	fmt.Printf("Date: %s\n", metadata.Date)
 	fmt.Printf("Description: %s\n", metadata.Description)
 	//fmt.Printf("HTML: %s\n", metadata.HTML)
+	fmt.Printf("FaviconURL: %s\n", metadata.FaviconURL)
+	fmt.Printf("LeadImageURL: %s\n", metadata.LeadImageURL)
 	fmt.Printf("Image: %v\n", metadata.Image)
 	fmt.Printf("Lang: %s\n", metadata.Lang)
 	fmt.Printf("Logo: %v\n", metadata.Logo)
@@ -129,6 +134,14 @@ func printMetadata(metadata metadata.Metadata) {
 	fmt.Printf("Title: %s\n", metadata.Title)
 	fmt.Printf("URL: %s\n", metadata.URL)
 	fmt.Printf("Video: %v\n", metadata.Video)
+	fmt.Printf("ReadableExcerpt: %s\n", metadata.ReadableExcerpt)
+	fmt.Printf("ReadableHTML: %s\n", metadata.ReadableHTML)
+	fmt.Printf("ReadableText: %s\n", metadata.ReadableText)
+	fmt.Printf("ReadableImage: %s\n", metadata.ReadableImage)
+	fmt.Printf("ReadableLang: %s\n", metadata.ReadableLang)
+	fmt.Printf("ReadableTitle: %s\n", metadata.ReadableTitle)
+	fmt.Printf("ReadableByline: %s\n", metadata.ReadableByline)
+	fmt.Printf("ReadableSiteName: %s\n", metadata.ReadableSiteName)
 
 	for key, value := range metadata.Dynamic {
 		fmt.Printf("%s: %s\n", key, value)

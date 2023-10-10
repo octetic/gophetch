@@ -2,6 +2,7 @@ package extractor
 
 import (
 	"fmt"
+	"net/url"
 	"strings"
 
 	"github.com/microcosm-cc/bluemonday"
@@ -24,11 +25,14 @@ func New() *Extractor {
 			"date":        rules.NewDateRule(),
 			"description": rules.NewDescriptionRule(),
 			"title":       rules.NewTitleRule(),
+			"readable":    rules.NewReadableRule(),
+			"favicon":     rules.NewFaviconRule(),
+			"lead_image":  rules.NewLeadImageRule(),
 		},
 	}
 }
 
-func (e *Extractor) ExtractMetadata(node *html.Node) (metadata.Metadata, error) {
+func (e *Extractor) ExtractMetadata(node *html.Node, targetURL *url.URL) (metadata.Metadata, error) {
 	var meta metadata.Metadata
 
 	if node == nil {
@@ -44,21 +48,36 @@ func (e *Extractor) ExtractMetadata(node *html.Node) (metadata.Metadata, error) 
 	meta.HTML = sb.String()
 
 	for key, rule := range e.Rules {
-		value, err := rule.Extract(node)
+		value, err := rule.Extract(node, targetURL)
 		if err != nil {
 			e.Errors = append(e.Errors, err)
+			continue
+		} else if len(value) == 0 {
 			continue
 		}
 
 		switch key {
 		case "author":
-			meta.Author = Normalize(value)
+			meta.Author = Normalize(value[0])
 		case "date":
-			meta.Date = Normalize(value)
+			meta.Date = Normalize(value[0])
 		case "description":
-			meta.Description = Normalize(value)
+			meta.Description = Normalize(value[0])
+		case "favicon":
+			meta.FaviconURL = value[0]
+		case "lead_image":
+			meta.LeadImageURL = value[0]
 		case "title":
-			meta.Title = Normalize(value)
+			meta.Title = Normalize(value[0])
+		case "readable":
+			meta.ReadableExcerpt = value[0]
+			meta.ReadableHTML = value[1]
+			meta.ReadableText = value[2]
+			meta.ReadableImage = value[3]
+			meta.ReadableLang = value[4]
+			meta.ReadableTitle = value[5]
+			meta.ReadableByline = value[6]
+			meta.ReadableSiteName = value[7]
 		default:
 			meta.Dynamic[key] = value
 		}

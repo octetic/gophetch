@@ -1,6 +1,7 @@
 package rules
 
 import (
+	"net/url"
 	"strings"
 
 	"github.com/andybalholm/cascadia"
@@ -12,7 +13,7 @@ import (
 	// import other required packages
 )
 
-func ExtractJSONLD(node *html.Node, selectors []string) (string, bool) {
+func ExtractJSONLD(node *html.Node, _ *url.URL, selectors []string) ([]string, bool) {
 	jsonLdNodes := cascadia.QueryAll(node, cascadia.MustCompile(`script[type="application/ld+json"]`))
 	for _, jsonLdNode := range jsonLdNodes {
 		if jsonLdNode.FirstChild != nil {
@@ -29,7 +30,7 @@ func ExtractJSONLD(node *html.Node, selectors []string) (string, bool) {
 					if nextVal, ok := val[key].(map[string]interface{}); ok {
 						val = nextVal
 					} else if finalVal, ok := val[key].(string); ok {
-						return finalVal, true
+						return []string{finalVal}, true
 					} else {
 						break
 					}
@@ -37,43 +38,58 @@ func ExtractJSONLD(node *html.Node, selectors []string) (string, bool) {
 			}
 		}
 	}
-	return "", false
+	return []string{}, false
 }
 
-func ExtractMeta(node *html.Node, selectors []string) (string, bool) {
+func ExtractMeta(node *html.Node, _ *url.URL, selectors []string) ([]string, bool) {
 	for _, selector := range selectors {
 		metaNode := cascadia.Query(node, cascadia.MustCompile(selector))
 		if metaNode != nil {
 			for _, attr := range metaNode.Attr {
 				if attr.Key == "content" {
-					return attr.Val, true
+					return []string{attr.Val}, true
 				}
 			}
 		}
 	}
-	return "", false
+	return []string{}, false
 }
 
-func ExtractCSS(node *html.Node, selectors []string) (string, bool) {
+func ExtractHref(node *html.Node, _ *url.URL, selectors []string) ([]string, bool) {
+	for _, selector := range selectors {
+		hrefNode := cascadia.Query(node, cascadia.MustCompile(selector))
+		if hrefNode != nil {
+			for _, attr := range hrefNode.Attr {
+				if attr.Key == "href" {
+					return []string{attr.Val}, true
+				}
+			}
+		}
+	}
+	return []string{}, false
+}
+
+func ExtractCSS(node *html.Node, _ *url.URL, selectors []string) ([]string, bool) {
 	for _, selector := range selectors {
 		cssNode := cascadia.Query(node, cascadia.MustCompile(selector))
 		if cssNode != nil && cssNode.FirstChild != nil {
-			return strings.TrimSpace(cssNode.FirstChild.Data), true
+			return []string{strings.TrimSpace(cssNode.FirstChild.Data)}, true
 		}
 	}
-	return "", false
+	return []string{}, false
 }
 
-func ExtractTime(node *html.Node, selectors []string) (string, bool) {
+// ExtractTime extracts the time from the given document.
+func ExtractTime(node *html.Node, _ *url.URL, selectors []string) ([]string, bool) {
 	for _, selector := range selectors {
 		cssNode := cascadia.Query(node, cascadia.MustCompile(selector))
 		if cssNode != nil {
 			for _, attr := range cssNode.Attr {
 				if attr.Key == "datetime" {
-					return attr.Val, true
+					return []string{attr.Val}, true
 				}
 			}
 		}
 	}
-	return "", false
+	return []string{}, false
 }
