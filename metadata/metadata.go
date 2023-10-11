@@ -4,33 +4,34 @@ package metadata
 type Metadata struct {
 	Audio            Audio    `json:"audio"`
 	Author           string   `json:"author"`
-	HTML             string   `json:"html"`
 	CanonicalURL     string   `json:"canonical_url"`
 	Date             string   `json:"date"`
 	Description      string   `json:"description"`
 	FaviconURL       string   `json:"favicon_url"`
 	FeedURLs         []string `json:"feed_url"`
-	LeadImageURL     string   `json:"lead_image_url"`
-	LeadImageInMeta  bool     `json:"lead_image_in_meta"`
+	HTML             string   `json:"html"`
 	Image            Image    `json:"image"`
+	IsReadable       bool     `json:"is_readable"`
+	Kind             string   `json:"kind"`
 	Lang             string   `json:"lang"`
+	LeadImageInMeta  bool     `json:"lead_image_in_meta"`
+	LeadImageURL     string   `json:"lead_image_url"`
 	Logo             Image    `json:"logo"`
 	Meta             Meta     `json:"meta"`
 	Publisher        string   `json:"publisher"`
-	Title            string   `json:"title"`
-	URL              string   `json:"url"`
-	Video            Video    `json:"video"`
-	IsReadable       bool     `json:"is_readable"`
-	ReadableText     string   `json:"readable_text"`
-	ReadableHTML     string   `json:"readable_html"`
+	ReadableByline   string   `json:"readable_byline"`
 	ReadableExcerpt  string   `json:"readable_excerpt"`
+	ReadableHTML     string   `json:"readable_html"`
 	ReadableImage    string   `json:"readable_image"`
 	ReadableLang     string   `json:"readable_lang"`
 	ReadableLength   int      `json:"readable_length"`
-	ReadableTitle    string   `json:"readable_title"`
-	ReadableByline   string   `json:"readable_byline"`
 	ReadableSiteName string   `json:"readable_site_name"`
+	ReadableText     string   `json:"readable_text"`
+	ReadableTitle    string   `json:"readable_title"`
 	SiteName         string   `json:"site_name"`
+	Title            string   `json:"title"`
+	URL              string   `json:"url"`
+	Video            Video    `json:"video"`
 	Dynamic          map[string]any
 }
 
