@@ -2,6 +2,7 @@ package rules
 
 import (
 	"net/url"
+	"strconv"
 
 	"github.com/go-shiori/go-readability"
 	"golang.org/x/net/html"
@@ -45,6 +46,7 @@ func extractReadable(node *html.Node, targetURL *url.URL, _ []string) ExtractRes
 		excerpt = excerpt[:255] + "..."
 	}
 
+	isReadable := strconv.FormatBool(readability.CheckDocument(node))
 	htmlContent := readabilityArticle.Content
 	textContent := readabilityArticle.TextContent
 	image := readabilityArticle.Image
@@ -53,7 +55,7 @@ func extractReadable(node *html.Node, targetURL *url.URL, _ []string) ExtractRes
 	byline := readabilityArticle.Byline
 	siteName := readabilityArticle.SiteName
 
-	value := []string{excerpt, htmlContent, textContent, image, lang, title, byline, siteName}
+	value := []string{excerpt, htmlContent, textContent, image, lang, title, byline, siteName, isReadable}
 	return ExtractResult{
 		Value: value,
 		Selector: SelectorInfo{

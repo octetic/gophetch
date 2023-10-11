@@ -20,6 +20,7 @@ type Metadata struct {
 	Title            string   `json:"title"`
 	URL              string   `json:"url"`
 	Video            Video    `json:"video"`
+	IsReadable       bool     `json:"is_readable"`
 	ReadableText     string   `json:"readable_text"`
 	ReadableHTML     string   `json:"readable_html"`
 	ReadableExcerpt  string   `json:"readable_excerpt"`

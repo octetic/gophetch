@@ -90,6 +90,9 @@ func (e *Extractor) ExtractMetadata(node *html.Node, targetURL *url.URL) (metada
 		case "publisher":
 			meta.Publisher = Normalize(value[0])
 		case "readable":
+			if len(value) != 9 {
+				return metadata.Metadata{}, fmt.Errorf("readable rule returned %d values, expected 9", len(value))
+			}
 			meta.ReadableExcerpt = value[0]
 			meta.ReadableHTML = value[1]
 			meta.ReadableText = value[2]
@@ -98,6 +101,7 @@ func (e *Extractor) ExtractMetadata(node *html.Node, targetURL *url.URL) (metada
 			meta.ReadableTitle = value[5]
 			meta.ReadableByline = value[6]
 			meta.ReadableSiteName = value[7]
+			meta.IsReadable = value[8] == "true"
 		case "site_name":
 			meta.SiteName = Normalize(value[0])
 		case "title":
