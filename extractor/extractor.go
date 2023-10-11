@@ -53,7 +53,7 @@ func (e *Extractor) ExtractMetadata(node *html.Node, targetURL *url.URL) (metada
 	meta.HTML = sb.String()
 
 	for key, rule := range e.Rules {
-		fmt.Printf("Extracting %s\n", key)
+		//fmt.Printf("Extracting %s\n", key)
 		value, err := rule.Extract(node, targetURL)
 		if err != nil {
 			e.Errors = append(e.Errors, err)
@@ -66,20 +66,21 @@ func (e *Extractor) ExtractMetadata(node *html.Node, targetURL *url.URL) (metada
 		case "author":
 			meta.Author = Normalize(value[0])
 		case "canonical":
-			meta.CanonicalURL = value[0]
-			meta.URL = value[0]
+			canonicalURL := rules.FixRelativePath(targetURL, value[0])
+			meta.CanonicalURL = canonicalURL
+			meta.URL = canonicalURL
 		case "date":
 			meta.Date = Normalize(value[0])
 		case "description":
 			meta.Description = Normalize(value[0])
 		case "favicon":
-			meta.FaviconURL = value[0]
+			meta.FaviconURL = rules.FixRelativePath(targetURL, value[0])
 		case "feed":
 			meta.FeedURLs = value
 		case "lang":
 			meta.Lang = Normalize(value[0])
 		case "lead_image":
-			meta.LeadImageURL = value[0]
+			meta.LeadImageURL = rules.FixRelativePath(targetURL, value[0])
 		case "publisher":
 			meta.Publisher = Normalize(value[0])
 		case "readable":
