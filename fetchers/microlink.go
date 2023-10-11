@@ -40,18 +40,8 @@ type MicrolinkFetcher struct {
 	metadata  metadata.Metadata
 }
 
-func (m *MicrolinkFetcher) buildQueryParams(urlPath string, rules map[string]MicrolinkDataQueryRule) url.Values {
-	q := url.Values{}
-	q.Add("url", urlPath)
-	q.Add("adblock", fmt.Sprintf("%t", m.AdBlock))
-	q.Add("prerender", fmt.Sprintf("%t", m.Prerender))
-	for ruleName, rule := range rules {
-		prefix := "data." + ruleName
-		for key, value := range rule.AsMap(prefix) {
-			q.Add(key, value)
-		}
-	}
-	return q
+func (m *MicrolinkFetcher) Name() string {
+	return "microlink"
 }
 
 func (m *MicrolinkFetcher) FetchHTML(targetURL string) (*http.Response, io.ReadCloser, error) {
@@ -123,4 +113,18 @@ func (m *MicrolinkFetcher) HasMetadata() bool {
 
 func (m *MicrolinkFetcher) Metadata() metadata.Metadata {
 	return m.metadata
+}
+
+func (m *MicrolinkFetcher) buildQueryParams(urlPath string, rules map[string]MicrolinkDataQueryRule) url.Values {
+	q := url.Values{}
+	q.Add("url", urlPath)
+	q.Add("adblock", fmt.Sprintf("%t", m.AdBlock))
+	q.Add("prerender", fmt.Sprintf("%t", m.Prerender))
+	for ruleName, rule := range rules {
+		prefix := "data." + ruleName
+		for key, value := range rule.AsMap(prefix) {
+			q.Add(key, value)
+		}
+	}
+	return q
 }

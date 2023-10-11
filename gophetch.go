@@ -24,13 +24,14 @@ type Gophetch struct {
 }
 
 type FetchedData struct {
-	HTMLNode   *html.Node
-	Headers    map[string][]string
-	IsHTML     bool
-	Metadata   metadata.Metadata
-	MimeType   string
-	Response   *http.Response
-	StatusCode int
+	HTMLNode    *html.Node
+	Headers     map[string][]string
+	IsHTML      bool
+	Metadata    metadata.Metadata
+	MimeType    string
+	Response    *http.Response
+	StatusCode  int
+	FetcherName string
 }
 
 func New(fetchers ...fetchers.HTMLFetcher) *Gophetch {
@@ -48,22 +49,24 @@ func (g *Gophetch) FetchAndExtractFromReader(r io.Reader, targetURL string) (Fet
 	err := g.Parser.Parse(r, nil, targetURL)
 	if err != nil {
 		return FetchedData{
-			HTMLNode:   g.Parser.Node(),
-			Headers:    g.Parser.Headers(),
-			IsHTML:     g.Parser.IsHTML(),
-			MimeType:   g.Parser.MimeType(),
-			Response:   nil,
-			StatusCode: 0,
+			HTMLNode:    g.Parser.Node(),
+			Headers:     g.Parser.Headers(),
+			IsHTML:      g.Parser.IsHTML(),
+			MimeType:    g.Parser.MimeType(),
+			Response:    nil,
+			StatusCode:  0,
+			FetcherName: "",
 		}, err
 	}
 
 	fetchedData := FetchedData{
-		HTMLNode:   g.Parser.Node(),
-		Headers:    g.Parser.Headers(),
-		IsHTML:     g.Parser.IsHTML(),
-		MimeType:   g.Parser.MimeType(),
-		Response:   nil,
-		StatusCode: 0,
+		HTMLNode:    g.Parser.Node(),
+		Headers:     g.Parser.Headers(),
+		IsHTML:      g.Parser.IsHTML(),
+		MimeType:    g.Parser.MimeType(),
+		Response:    nil,
+		StatusCode:  0,
+		FetcherName: "",
 	}
 
 	data, err := g.Extractor.ExtractMetadata(g.Parser.Node(), g.Parser.URL())
@@ -77,9 +80,10 @@ func (g *Gophetch) FetchAndExtractFromReader(r io.Reader, targetURL string) (Fet
 
 // FetchAndExtractFromURL fetches and extracts data from a URL using the available fetchers
 func (g *Gophetch) FetchAndExtractFromURL(targetURL string) (FetchedData, error) {
+	var err error
 	var body io.ReadCloser
 	var resp *http.Response
-	var err error
+	var fetcherName string
 
 	// If no fetchers are provided, use the standard HTTP fetcher
 	if len(g.Fetchers) == 0 {
@@ -93,6 +97,7 @@ func (g *Gophetch) FetchAndExtractFromURL(targetURL string) (FetchedData, error)
 		if err == nil {
 			data = fetcher.Metadata()
 			hasData = fetcher.HasMetadata()
+			fetcherName = fetcher.Name()
 			break
 		}
 	}
@@ -113,13 +118,14 @@ func (g *Gophetch) FetchAndExtractFromURL(targetURL string) (FetchedData, error)
 	}
 
 	fetchedData := FetchedData{
-		HTMLNode:   g.Parser.Node(),
-		Headers:    g.Parser.Headers(),
-		IsHTML:     g.Parser.IsHTML(),
-		Metadata:   metadata.Metadata{},
-		MimeType:   g.Parser.MimeType(),
-		Response:   resp,
-		StatusCode: resp.StatusCode,
+		HTMLNode:    g.Parser.Node(),
+		Headers:     g.Parser.Headers(),
+		IsHTML:      g.Parser.IsHTML(),
+		Metadata:    metadata.Metadata{},
+		MimeType:    g.Parser.MimeType(),
+		Response:    resp,
+		StatusCode:  resp.StatusCode,
+		FetcherName: fetcherName,
 	}
 
 	// If the fetcher provided metadata, use that instead

@@ -10,6 +10,10 @@ import (
 
 type StandardHTTPFetcher struct{}
 
+func (s *StandardHTTPFetcher) Name() string {
+	return "standard"
+}
+
 func (s *StandardHTTPFetcher) FetchHTML(url string) (*http.Response, io.ReadCloser, error) {
 	fmt.Println("Fetching HTML from Standard HTTP")
 

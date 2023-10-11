@@ -13,6 +13,11 @@ type ProxyHTTPFetcher struct {
 	ProxyURL string
 }
 
+// Name returns the name of the fetcher.
+func (p *ProxyHTTPFetcher) Name() string {
+	return "proxy"
+}
+
 func (p *ProxyHTTPFetcher) FetchHTML(targetURL string) (io.ReadCloser, error) {
 	proxyURL, err := url.Parse(p.ProxyURL)
 	if err != nil {

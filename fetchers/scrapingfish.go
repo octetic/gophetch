@@ -13,6 +13,10 @@ type ScrapingfishFetcher struct {
 	APIKey string
 }
 
+func (s *ScrapingfishFetcher) Name() string {
+	return "scrapingfish"
+}
+
 func (s *ScrapingfishFetcher) FetchHTML(targetURL string) (*http.Response, io.ReadCloser, error) {
 	fmt.Println("Fetching HTML from Scrapingfish")
 	const endpoint = "https://scraping.narf.ai/api/v1/"
