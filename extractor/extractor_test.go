@@ -1,6 +1,7 @@
 package extractor_test
 
 import (
+	"net/url"
 	"strings"
 	"testing"
 
@@ -44,6 +45,10 @@ func TestExtractorIntegration(t *testing.T) {
 	}
 
 	ext := extractor.New()
+	targetURL, err := url.Parse("https://example.com")
+	if err != nil {
+		t.Fatal(err)
+	}
 
 	for _, tC := range testCases {
 		t.Run(tC.desc, func(t *testing.T) {
@@ -54,7 +59,7 @@ func TestExtractorIntegration(t *testing.T) {
 			}
 
 			// Call the Extractor's method to get all metadata
-			result, err := ext.ExtractMetadata(mockNode)
+			result, err := ext.ExtractMetadata(mockNode, targetURL)
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -137,6 +142,10 @@ func TestExtractorBoundary(t *testing.T) {
 	}
 
 	ext := extractor.New()
+	targetURL, err := url.Parse("https://example.com")
+	if err != nil {
+		t.Fatal(err)
+	}
 
 	for _, tC := range testCases {
 		t.Run(tC.desc, func(t *testing.T) {
@@ -147,7 +156,7 @@ func TestExtractorBoundary(t *testing.T) {
 			}
 
 			// Call the Extractor's method to get all metadata
-			result, err := ext.ExtractMetadata(mockNode)
+			result, err := ext.ExtractMetadata(mockNode, targetURL)
 			if err != nil {
 				t.Fatal(err)
 			}
