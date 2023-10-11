@@ -28,7 +28,7 @@ var faviconStrategies = []ExtractionStrategy{
 			"link[rel='apple-touch-icon-precomposed']",
 			"link[rel~='mask-icon']",
 		},
-		Extractor: ExtractHref,
+		Extractor: ExtractAttr("href"),
 	},
 }
 

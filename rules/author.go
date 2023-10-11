@@ -30,7 +30,7 @@ var authorStrategies = []ExtractionStrategy{
 			`meta[property="dc:creator"]`,
 			`meta[itemprop="author"]`,
 		},
-		Extractor: ExtractMeta,
+		Extractor: ExtractAttr("content"),
 	},
 	{
 		Selectors: []string{

@@ -43,7 +43,7 @@ var leadImageStrategies = []ExtractionStrategy{
 			"meta[property='twitter:image']",
 			"meta[itemprop='image']",
 		},
-		Extractor: ExtractMeta,
+		Extractor: ExtractAttr("content"),
 	},
 	{
 		Selectors: []string{

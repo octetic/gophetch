@@ -10,13 +10,23 @@ func (yt YouTube) DomainKey() string {
 
 func (yt YouTube) Rules() map[string]rules.Rule {
 	return map[string]rules.Rule{
-		"author": rules.NewAuthorRule(rules.ExtractionStrategy{
-			Selectors: []string{`meta[property="og:site_name"]`},
-			Extractor: rules.ExtractMeta,
-		}),
-		"date": rules.NewDateRule(rules.ExtractionStrategy{
-			Selectors: []string{`meta[property="og:updated_time"]`},
-			Extractor: rules.ExtractMeta,
+		"author": rules.NewAuthorRule(
+			rules.ExtractionStrategy{
+				Selectors: []string{
+					`[class*="user-info"]`,
+				},
+				Extractor: rules.ExtractCSS,
+			},
+			rules.ExtractionStrategy{
+				Selectors: []string{
+					`[itemprop="author"] [itemprop="name"]`,
+				},
+				Extractor: rules.ExtractAttr("content"),
+			},
+		),
+		"image": rules.NewDateRule(rules.ExtractionStrategy{
+			Selectors: []string{},
+			Extractor: rules.ExtractAttr("content"),
 		}),
 	}
 }

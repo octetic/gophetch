@@ -41,34 +41,6 @@ func ExtractJSONLD(node *html.Node, _ *url.URL, selectors []string) ([]string, b
 	return []string{}, false
 }
 
-func ExtractMeta(node *html.Node, _ *url.URL, selectors []string) ([]string, bool) {
-	for _, selector := range selectors {
-		metaNode := cascadia.Query(node, cascadia.MustCompile(selector))
-		if metaNode != nil {
-			for _, attr := range metaNode.Attr {
-				if attr.Key == "content" {
-					return []string{attr.Val}, true
-				}
-			}
-		}
-	}
-	return []string{}, false
-}
-
-func ExtractHref(node *html.Node, _ *url.URL, selectors []string) ([]string, bool) {
-	for _, selector := range selectors {
-		hrefNode := cascadia.Query(node, cascadia.MustCompile(selector))
-		if hrefNode != nil {
-			for _, attr := range hrefNode.Attr {
-				if attr.Key == "href" {
-					return []string{attr.Val}, true
-				}
-			}
-		}
-	}
-	return []string{}, false
-}
-
 func ExtractCSS(node *html.Node, _ *url.URL, selectors []string) ([]string, bool) {
 	for _, selector := range selectors {
 		cssNode := cascadia.Query(node, cascadia.MustCompile(selector))
@@ -79,17 +51,19 @@ func ExtractCSS(node *html.Node, _ *url.URL, selectors []string) ([]string, bool
 	return []string{}, false
 }
 
-// ExtractTime extracts the time from the given document.
-func ExtractTime(node *html.Node, _ *url.URL, selectors []string) ([]string, bool) {
-	for _, selector := range selectors {
-		cssNode := cascadia.Query(node, cascadia.MustCompile(selector))
-		if cssNode != nil {
-			for _, attr := range cssNode.Attr {
-				if attr.Key == "datetime" {
-					return []string{attr.Val}, true
+// ExtractAttr extracts the given attribute from the given document.
+func ExtractAttr(attribute string) ExtractFunc {
+	return func(node *html.Node, _ *url.URL, selectors []string) ([]string, bool) {
+		for _, selector := range selectors {
+			cssNode := cascadia.Query(node, cascadia.MustCompile(selector))
+			if cssNode != nil {
+				for _, attr := range cssNode.Attr {
+					if attr.Key == attribute {
+						return []string{attr.Val}, true
+					}
 				}
 			}
 		}
+		return []string{}, false
 	}
-	return []string{}, false
 }

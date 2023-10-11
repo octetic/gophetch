@@ -15,7 +15,7 @@ func NewTitleRule() *TitleRule {
 var titleStrategies = []ExtractionStrategy{
 	{
 		Selectors: []string{"meta[property='og:title']", "meta[name='twitter:title']", "meta[property='twitter:title']"},
-		Extractor: ExtractMeta,
+		Extractor: ExtractAttr("content"),
 	},
 	{
 		Selectors: []string{"title"},

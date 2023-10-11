@@ -21,7 +21,7 @@ var descriptionStrategies = []ExtractionStrategy{
 			"meta[name='description']",
 			"meta[itemprop='description']",
 		},
-		Extractor: ExtractMeta,
+		Extractor: ExtractAttr("content"),
 	},
 
 	// JSON LD

@@ -22,12 +22,17 @@ func New() *Extractor {
 	return &Extractor{
 		Rules: map[string]rules.Rule{
 			"author":      rules.NewAuthorRule(),
+			"canonical":   rules.NewCanonicalRule(),
 			"date":        rules.NewDateRule(),
 			"description": rules.NewDescriptionRule(),
-			"title":       rules.NewTitleRule(),
-			"readable":    rules.NewReadableRule(),
 			"favicon":     rules.NewFaviconRule(),
+			"feed":        rules.NewFeedRule(),
+			"lang":        rules.NewLangRule(),
 			"lead_image":  rules.NewLeadImageRule(),
+			"publisher":   rules.NewPublisherRule(),
+			"readable":    rules.NewReadableRule(),
+			"site_name":   rules.NewSiteNameRule(),
+			"title":       rules.NewTitleRule(),
 		},
 	}
 }
@@ -48,6 +53,7 @@ func (e *Extractor) ExtractMetadata(node *html.Node, targetURL *url.URL) (metada
 	meta.HTML = sb.String()
 
 	for key, rule := range e.Rules {
+		fmt.Printf("Extracting %s\n", key)
 		value, err := rule.Extract(node, targetURL)
 		if err != nil {
 			e.Errors = append(e.Errors, err)
@@ -59,16 +65,23 @@ func (e *Extractor) ExtractMetadata(node *html.Node, targetURL *url.URL) (metada
 		switch key {
 		case "author":
 			meta.Author = Normalize(value[0])
+		case "canonical":
+			meta.CanonicalURL = value[0]
+			meta.URL = value[0]
 		case "date":
 			meta.Date = Normalize(value[0])
 		case "description":
 			meta.Description = Normalize(value[0])
 		case "favicon":
 			meta.FaviconURL = value[0]
+		case "feed":
+			meta.FeedURLs = value
+		case "lang":
+			meta.Lang = Normalize(value[0])
 		case "lead_image":
 			meta.LeadImageURL = value[0]
-		case "title":
-			meta.Title = Normalize(value[0])
+		case "publisher":
+			meta.Publisher = Normalize(value[0])
 		case "readable":
 			meta.ReadableExcerpt = value[0]
 			meta.ReadableHTML = value[1]
@@ -78,6 +91,10 @@ func (e *Extractor) ExtractMetadata(node *html.Node, targetURL *url.URL) (metada
 			meta.ReadableTitle = value[5]
 			meta.ReadableByline = value[6]
 			meta.ReadableSiteName = value[7]
+		case "site_name":
+			meta.SiteName = Normalize(value[0])
+		case "title":
+			meta.Title = Normalize(value[0])
 		default:
 			meta.Dynamic[key] = value
 		}

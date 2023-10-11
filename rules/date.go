@@ -36,7 +36,7 @@ var dateStrategies = []ExtractionStrategy{
 			"[itemprop*='datemodified']",
 			"[itemprop*='date']",
 		},
-		Extractor: ExtractMeta,
+		Extractor: ExtractAttr("content"),
 	},
 
 	// Time selectors
@@ -45,7 +45,7 @@ var dateStrategies = []ExtractionStrategy{
 			"time[itemprop*='date']",
 			"time[datetime]",
 		},
-		Extractor: ExtractTime,
+		Extractor: ExtractAttr("datetime"),
 	},
 
 	// Common CSS selectors

@@ -121,10 +121,12 @@ func printMetadata(metadata metadata.Metadata) {
 	fmt.Println("METADATA: ")
 	fmt.Printf("Audio: %v\n", metadata.Audio)
 	fmt.Printf("Author: %s\n", metadata.Author)
+	fmt.Printf("CanonicalURL: %s\n", metadata.CanonicalURL)
 	fmt.Printf("Date: %s\n", metadata.Date)
 	fmt.Printf("Description: %s\n", metadata.Description)
 	//fmt.Printf("HTML: %s\n", metadata.HTML)
 	fmt.Printf("FaviconURL: %s\n", metadata.FaviconURL)
+	fmt.Printf("Feed: %v\n", metadata.FeedURLs)
 	fmt.Printf("LeadImageURL: %s\n", metadata.LeadImageURL)
 	fmt.Printf("Image: %v\n", metadata.Image)
 	fmt.Printf("Lang: %s\n", metadata.Lang)
@@ -142,6 +144,7 @@ func printMetadata(metadata metadata.Metadata) {
 	fmt.Printf("ReadableTitle: %s\n", metadata.ReadableTitle)
 	fmt.Printf("ReadableByline: %s\n", metadata.ReadableByline)
 	fmt.Printf("ReadableSiteName: %s\n", metadata.ReadableSiteName)
+	fmt.Printf("SiteName: %s\n", metadata.SiteName)
 
 	for key, value := range metadata.Dynamic {
 		fmt.Printf("%s: %s\n", key, value)
