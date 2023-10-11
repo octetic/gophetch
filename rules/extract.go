@@ -13,7 +13,13 @@ import (
 	// import other required packages
 )
 
-func ExtractJSONLD(node *html.Node, _ *url.URL, selectors []string) ([]string, bool) {
+type SelectorInfo struct {
+	Attr     string
+	InMeta   bool
+	Selector string
+}
+
+func ExtractJSONLD(node *html.Node, _ *url.URL, selectors []string) ExtractResult {
 	jsonLdNodes := cascadia.QueryAll(node, cascadia.MustCompile(`script[type="application/ld+json"]`))
 	for _, jsonLdNode := range jsonLdNodes {
 		if jsonLdNode.FirstChild != nil {
@@ -30,7 +36,15 @@ func ExtractJSONLD(node *html.Node, _ *url.URL, selectors []string) ([]string, b
 					if nextVal, ok := val[key].(map[string]interface{}); ok {
 						val = nextVal
 					} else if finalVal, ok := val[key].(string); ok {
-						return []string{finalVal}, true
+						return ExtractResult{
+							Value: []string{finalVal},
+							Selector: SelectorInfo{
+								Attr:     key,
+								InMeta:   false,
+								Selector: selector,
+							},
+							Found: true,
+						}
 					} else {
 						break
 					}
@@ -38,32 +52,63 @@ func ExtractJSONLD(node *html.Node, _ *url.URL, selectors []string) ([]string, b
 			}
 		}
 	}
-	return []string{}, false
+	return ExtractResult{}
 }
 
-func ExtractCSS(node *html.Node, _ *url.URL, selectors []string) ([]string, bool) {
+func ExtractCSS(node *html.Node, _ *url.URL, selectors []string) ExtractResult {
 	for _, selector := range selectors {
 		cssNode := cascadia.Query(node, cascadia.MustCompile(selector))
 		if cssNode != nil && cssNode.FirstChild != nil {
-			return []string{strings.TrimSpace(cssNode.FirstChild.Data)}, true
+			return ExtractResult{
+				Value: []string{strings.TrimSpace(cssNode.FirstChild.Data)},
+				Selector: SelectorInfo{
+					Attr:     "text",
+					InMeta:   false,
+					Selector: selector,
+				},
+				Found: true,
+			}
 		}
 	}
-	return []string{}, false
+	return ExtractResult{}
 }
 
 // ExtractAttr extracts the given attribute from the given document.
 func ExtractAttr(attribute string) ExtractFunc {
-	return func(node *html.Node, _ *url.URL, selectors []string) ([]string, bool) {
+	return func(node *html.Node, _ *url.URL, selectors []string) ExtractResult {
 		for _, selector := range selectors {
 			cssNode := cascadia.Query(node, cascadia.MustCompile(selector))
 			if cssNode != nil {
 				for _, attr := range cssNode.Attr {
 					if attr.Key == attribute {
-						return []string{attr.Val}, true
+						return ExtractResult{
+							Value: []string{attr.Val},
+							Selector: SelectorInfo{
+								Attr:     attribute,
+								InMeta:   false,
+								Selector: selector,
+							},
+							Found: true,
+						}
 					}
 				}
 			}
 		}
-		return []string{}, false
+		return ExtractResult{}
+	}
+}
+
+// ExtractMeta extracts the given meta tag from the given document.
+func ExtractMeta(node *html.Node, targetURL *url.URL, selectors []string) ExtractResult {
+	fn := ExtractAttr("content")
+	result := fn(node, targetURL, selectors)
+	return ExtractResult{
+		Value: result.Value,
+		Selector: SelectorInfo{
+			Attr:     result.Selector.Attr,
+			InMeta:   true,
+			Selector: result.Selector.Selector,
+		},
+		Found: result.Found,
 	}
 }

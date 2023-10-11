@@ -54,13 +54,15 @@ func (e *Extractor) ExtractMetadata(node *html.Node, targetURL *url.URL) (metada
 
 	for key, rule := range e.Rules {
 		//fmt.Printf("Extracting %s\n", key)
-		value, err := rule.Extract(node, targetURL)
+		result, err := rule.Extract(node, targetURL)
 		if err != nil {
 			e.Errors = append(e.Errors, err)
 			continue
-		} else if len(value) == 0 {
+		} else if len(result.Value) == 0 || !result.Found {
 			continue
 		}
+
+		value := result.Value
 
 		switch key {
 		case "author":
@@ -81,6 +83,7 @@ func (e *Extractor) ExtractMetadata(node *html.Node, targetURL *url.URL) (metada
 			meta.Lang = Normalize(value[0])
 		case "lead_image":
 			meta.LeadImageURL = rules.FixRelativePath(targetURL, value[0])
+			meta.LeadImageInMeta = result.Selector.InMeta
 		case "publisher":
 			meta.Publisher = Normalize(value[0])
 		case "readable":

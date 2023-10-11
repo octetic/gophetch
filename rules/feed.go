@@ -30,18 +30,27 @@ var feedStrategies = []ExtractionStrategy{
 }
 
 // Extract extracts the value from the node
-func (fr *FeedRule) Extract(node *html.Node, targetURL *url.URL) ([]string, error) {
+func (fr *FeedRule) Extract(node *html.Node, targetURL *url.URL) (ExtractResult, error) {
 	var feeds []string
 
 	for _, strategy := range fr.Strategies {
-		if value, found := strategy.Extractor(node, targetURL, strategy.Selectors); found {
+		result := strategy.Extractor(node, targetURL, strategy.Selectors)
+		if result.Found {
 			// For each value found, fix the URL if it's relative and add it to the list of feeds.
-			for i, v := range value {
-				value[i] = FixRelativePath(targetURL, v)
+			for i, v := range result.Value {
+				result.Value[i] = FixRelativePath(targetURL, v)
 			}
-			feeds = append(feeds, value...)
+			feeds = append(feeds, result.Value...)
 		}
 	}
 
-	return feeds, ErrValueNotFound
+	return ExtractResult{
+		Value: feeds,
+		Selector: SelectorInfo{
+			Attr:     "href",
+			InMeta:   false,
+			Selector: "feed",
+		},
+		Found: len(feeds) > 0,
+	}, nil
 }

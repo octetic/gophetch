@@ -33,11 +33,11 @@ var readableStrategies = []ExtractionStrategy{
 // extractReadable extracts the readable content from the node
 // It uses readability's article extraction routines
 // Returns the excerpt, html content, and text content in that order
-func extractReadable(node *html.Node, targetURL *url.URL, _ []string) ([]string, bool) {
+func extractReadable(node *html.Node, targetURL *url.URL, _ []string) ExtractResult {
 	// Using readability's article extraction routines as they are more reliable than ours
 	readabilityArticle, err := readability.FromDocument(node, targetURL)
 	if err != nil {
-		return []string{}, false
+		return ExtractResult{}
 	}
 
 	excerpt := readabilityArticle.Excerpt
@@ -53,5 +53,14 @@ func extractReadable(node *html.Node, targetURL *url.URL, _ []string) ([]string,
 	byline := readabilityArticle.Byline
 	siteName := readabilityArticle.SiteName
 
-	return []string{excerpt, htmlContent, textContent, image, lang, title, byline, siteName}, true
+	value := []string{excerpt, htmlContent, textContent, image, lang, title, byline, siteName}
+	return ExtractResult{
+		Value: value,
+		Selector: SelectorInfo{
+			Attr:     "readable",
+			InMeta:   false,
+			Selector: "readable",
+		},
+		Found: true,
+	}
 }

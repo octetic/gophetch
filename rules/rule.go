@@ -12,12 +12,20 @@ var ErrValueNotFound = errors.New("no value found")
 // Rule is the interface for all rules
 type Rule interface {
 	// Extract extracts the value from the node
-	Extract(node *html.Node, targetURL *url.URL) ([]string, error)
+	Extract(node *html.Node, targetURL *url.URL) (ExtractResult, error)
+}
+
+// ExtractResult is the result of an extraction
+type ExtractResult struct {
+	Value    []string
+	Selector SelectorInfo
+	Found    bool
 }
 
 // ExtractFunc is the function signature for all extractors
-// It takes in a node, a target url, and a list of selectors
-type ExtractFunc func(node *html.Node, targetURL *url.URL, selectors []string) ([]string, bool)
+// It accepts the node to extract from, the target URL, and the selectors to use
+// It returns the value as an array of strings, a string indicating where it was found, and a boolean indicating if the value was found
+type ExtractFunc func(node *html.Node, targetURL *url.URL, selectors []string) ExtractResult
 
 // ExtractionStrategy is the strategy for extracting a value
 type ExtractionStrategy struct {
@@ -31,12 +39,13 @@ type BaseRule struct {
 }
 
 // Extract extracts the value from the node
-func (br *BaseRule) Extract(node *html.Node, targetURL *url.URL) ([]string, error) {
+// It iterates through all the strategies and returns the first value found
+func (br *BaseRule) Extract(node *html.Node, targetURL *url.URL) (ExtractResult, error) {
 	for _, strategy := range br.Strategies {
-		if value, found := strategy.Extractor(node, targetURL, strategy.Selectors); found {
-			return value, nil
+		result := strategy.Extractor(node, targetURL, strategy.Selectors)
+		if result.Found {
+			return result, nil
 		}
 	}
-
-	return []string{}, ErrValueNotFound
+	return ExtractResult{}, ErrValueNotFound
 }

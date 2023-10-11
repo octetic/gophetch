@@ -32,17 +32,25 @@ var faviconStrategies = []ExtractionStrategy{
 	},
 }
 
-func (r *FaviconRule) Extract(node *html.Node, targetURL *url.URL) ([]string, error) {
-	value, err := r.BaseRule.Extract(node, targetURL)
-	if err == nil && len(value) > 0 {
-		return value, nil
+func (r *FaviconRule) Extract(node *html.Node, targetURL *url.URL) (ExtractResult, error) {
+	result, err := r.BaseRule.Extract(node, targetURL)
+	if err == nil && len(result.Value) > 0 {
+		return result, nil
 	}
 
 	// If no favicon was found, try to extract it from the /favicon.ico file.
 	faviconUrl := fmt.Sprintf("%s://%s/favicon.ico", targetURL.Scheme, targetURL.Host)
 	if IsValidImage(faviconUrl) {
-		return []string{faviconUrl}, nil
+		return ExtractResult{
+			Value: []string{faviconUrl},
+			Selector: SelectorInfo{
+				Attr:     "href",
+				InMeta:   false,
+				Selector: "favicon.ico",
+			},
+			Found: true,
+		}, nil
 	}
 
-	return []string{}, ErrValueNotFound
+	return ExtractResult{}, ErrValueNotFound
 }

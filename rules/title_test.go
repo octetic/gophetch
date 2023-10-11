@@ -84,7 +84,7 @@ func TestTitleRuleSelectors(t *testing.T) {
 			if err != nil {
 				assert.Equal(t, tC.error, err, fmt.Sprintf("Want error %v, got %v", tC.error, err))
 			} else {
-				assert.Equal(t, tC.expected, result, fmt.Sprintf("Want %s, got %s", tC.expected, result))
+				assert.Equal(t, tC.expected, result.Value, fmt.Sprintf("Want %s, got %s", tC.expected, result.Value))
 			}
 
 		})

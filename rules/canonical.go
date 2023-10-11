@@ -38,25 +38,38 @@ var canonicalStrategies = []ExtractionStrategy{
 	},
 }
 
-func (cr *CanonicalRule) Extract(node *html.Node, targetURL *url.URL) ([]string, error) {
-	values, err := cr.BaseRule.Extract(node, targetURL)
+func (cr *CanonicalRule) Extract(node *html.Node, targetURL *url.URL) (ExtractResult, error) {
+	result, err := cr.BaseRule.Extract(node, targetURL)
 	if err != nil {
 		if !errors.Is(err, ErrValueNotFound) {
-			return []string{}, err
+			return ExtractResult{}, err
 		}
 	}
+
+	inMeta := result.Selector.Selector == "content"
 
 	// If the value is not a full URL, then prepend the scheme and host
-	for i, value := range values {
+	for i, value := range result.Value {
 		if !strings.HasPrefix(value, "http") {
-			values[i] = targetURL.Scheme + "://" + targetURL.Host + value
+			result.Value[i] = targetURL.Scheme + "://" + targetURL.Host + value
 		}
 	}
 
-	if len(values) > 0 {
-		return values, nil
+	result = ExtractResult{
+		Value: result.Value,
+		Selector: SelectorInfo{
+			Attr:     result.Selector.Attr,
+			InMeta:   inMeta,
+			Selector: result.Selector.Selector,
+		},
+		Found: true,
+	}
+
+	if len(result.Value) > 0 {
+		return result, nil
 	}
 
 	// If the values are empty, then return the current url
-	return []string{targetURL.String()}, nil
+	result.Value = []string{targetURL.String()}
+	return result, nil
 }

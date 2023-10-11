@@ -10,6 +10,7 @@ type Metadata struct {
 	FaviconURL       string   `json:"favicon_url"`
 	FeedURLs         []string `json:"feed_url"`
 	LeadImageURL     string   `json:"lead_image_url"`
+	LeadImageInMeta  bool     `json:"lead_image_in_meta"`
 	Image            Image    `json:"image"`
 	Lang             string   `json:"lang"`
 	Logo             Image    `json:"logo"`
