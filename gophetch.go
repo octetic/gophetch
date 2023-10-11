@@ -10,6 +10,7 @@ import (
 	"golang.org/x/net/html"
 
 	"github.com/pixiesys/gophetch/fetchers"
+	"github.com/pixiesys/gophetch/metadata"
 	"github.com/pixiesys/gophetch/sites"
 )
 
@@ -24,7 +25,7 @@ type FetchedData struct {
 	HTMLNode    *html.Node
 	Headers     map[string][]string
 	IsHTML      bool
-	Metadata    Metadata
+	Metadata    metadata.Metadata
 	MimeType    string
 	Response    *http.Response
 	StatusCode  int
@@ -87,7 +88,7 @@ func (g *Gophetch) FetchAndExtractFromURL(targetURL string) (FetchedData, error)
 		g.Fetchers = append(g.Fetchers, &fetchers.StandardHTTPFetcher{})
 	}
 
-	var data Metadata
+	var data metadata.Metadata
 	hasData := false
 	for _, fetcher := range g.Fetchers {
 		resp, body, err = fetcher.FetchHTML(targetURL)
@@ -118,7 +119,7 @@ func (g *Gophetch) FetchAndExtractFromURL(targetURL string) (FetchedData, error)
 		HTMLNode:    g.Parser.Node(),
 		Headers:     g.Parser.Headers(),
 		IsHTML:      g.Parser.IsHTML(),
-		Metadata:    Metadata{},
+		Metadata:    metadata.Metadata{},
 		MimeType:    g.Parser.MimeType(),
 		Response:    resp,
 		StatusCode:  resp.StatusCode,

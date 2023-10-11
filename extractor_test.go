@@ -9,13 +9,14 @@ import (
 	"golang.org/x/net/html"
 
 	"github.com/pixiesys/gophetch"
+	"github.com/pixiesys/gophetch/metadata"
 )
 
 func TestExtractorIntegration(t *testing.T) {
 	testCases := []struct {
 		desc     string
 		mockHTML string
-		expected gophetch.Metadata
+		expected metadata.Metadata
 	}{
 		{
 			desc: "Full HTML Page",
@@ -33,7 +34,7 @@ func TestExtractorIntegration(t *testing.T) {
 				</body>
 				</html>
 			`,
-			expected: gophetch.Metadata{
+			expected: metadata.Metadata{
 				Author:      "John Schema",
 				Title:       "OG Title",
 				Description: "OG Description",
@@ -73,7 +74,7 @@ func TestExtractorBoundary(t *testing.T) {
 	testCases := []struct {
 		desc     string
 		mockHTML string
-		expected gophetch.Metadata
+		expected metadata.Metadata
 	}{
 		{
 			desc: "Missing All Tags",
@@ -86,7 +87,7 @@ func TestExtractorBoundary(t *testing.T) {
 				</body>
 				</html>
 			`,
-			expected: gophetch.Metadata{},
+			expected: metadata.Metadata{},
 		},
 		{
 			desc: "Empty Strings",
@@ -103,7 +104,7 @@ func TestExtractorBoundary(t *testing.T) {
 				</body>
 				</html>
 			`,
-			expected: gophetch.Metadata{},
+			expected: metadata.Metadata{},
 		},
 		{
 			desc: "Null Values",
@@ -120,7 +121,7 @@ func TestExtractorBoundary(t *testing.T) {
 				</body>
 				</html>
 			`,
-			expected: gophetch.Metadata{},
+			expected: metadata.Metadata{},
 		},
 		{
 			desc: "Malformed HTML",
@@ -133,7 +134,7 @@ func TestExtractorBoundary(t *testing.T) {
 				<body>
 				</body>
 			`,
-			expected: gophetch.Metadata{
+			expected: metadata.Metadata{
 				Title: "OG Title",
 			},
 		},

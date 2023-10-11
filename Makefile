@@ -52,6 +52,7 @@ test:
 ## build: build the cmd/web application
 .PHONY: build
 build:
+	cd cmd/gophetch && go get -u
 	cd cmd/gophetch && go mod verify
 	cd cmd/gophetch && go build -ldflags='-s' -o=${PROJECT_ROOT}/bin/gophetch
 

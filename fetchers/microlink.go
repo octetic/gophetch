@@ -8,14 +8,14 @@ import (
 	"net/url"
 	"strings"
 
-	"github.com/pixiesys/gophetch"
+	"github.com/pixiesys/gophetch/metadata"
 )
 
 const endpoint = "https://pro.microlink.io/"
 
 type MicrolinkFetchedJSON struct {
 	Status  string            `json:"status"`
-	Data    gophetch.Metadata `json:"data"`
+	Data    metadata.Metadata `json:"data"`
 	Message string            `json:"message"`
 }
 
@@ -37,7 +37,7 @@ type MicrolinkFetcher struct {
 	AdBlock   bool
 	APIKey    string
 	Prerender bool
-	metadata  gophetch.Metadata
+	metadata  metadata.Metadata
 }
 
 func (m *MicrolinkFetcher) Name() string {
@@ -111,7 +111,7 @@ func (m *MicrolinkFetcher) HasMetadata() bool {
 	return true
 }
 
-func (m *MicrolinkFetcher) Metadata() gophetch.Metadata {
+func (m *MicrolinkFetcher) Metadata() metadata.Metadata {
 	return m.metadata
 }
 

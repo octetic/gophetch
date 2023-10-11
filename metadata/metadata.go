@@ -1,4 +1,4 @@
-package gophetch
+package metadata
 
 type Metadata struct {
 	Audio            Audio    `json:"audio"`

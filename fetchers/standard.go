@@ -5,7 +5,7 @@ import (
 	"io"
 	"net/http"
 
-	"github.com/pixiesys/gophetch"
+	"github.com/pixiesys/gophetch/metadata"
 )
 
 type StandardHTTPFetcher struct{}
@@ -29,6 +29,6 @@ func (s *StandardHTTPFetcher) HasMetadata() bool {
 	return false
 }
 
-func (s *StandardHTTPFetcher) Metadata() gophetch.Metadata {
-	return gophetch.Metadata{}
+func (s *StandardHTTPFetcher) Metadata() metadata.Metadata {
+	return metadata.Metadata{}
 }

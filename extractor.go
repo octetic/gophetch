@@ -8,6 +8,7 @@ import (
 	"github.com/microcosm-cc/bluemonday"
 	"golang.org/x/net/html"
 
+	"github.com/pixiesys/gophetch/metadata"
 	"github.com/pixiesys/gophetch/rules"
 	"github.com/pixiesys/gophetch/sites"
 )
@@ -36,18 +37,18 @@ func NewExtractor() *Extractor {
 	}
 }
 
-func (e *Extractor) ExtractMetadata(node *html.Node, targetURL *url.URL) (Metadata, error) {
-	var meta Metadata
+func (e *Extractor) ExtractMetadata(node *html.Node, targetURL *url.URL) (metadata.Metadata, error) {
+	var meta metadata.Metadata
 
 	if node == nil {
-		return Metadata{}, fmt.Errorf("node is nil")
+		return metadata.Metadata{}, fmt.Errorf("node is nil")
 	}
 
 	// Get the HTML as a string
 	var sb strings.Builder
 	err := html.Render(&sb, node)
 	if err != nil {
-		return Metadata{}, err
+		return metadata.Metadata{}, err
 	}
 	meta.HTML = sb.String()
 
