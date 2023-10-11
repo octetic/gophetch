@@ -26,6 +26,7 @@ type Metadata struct {
 	ReadableExcerpt  string   `json:"readable_excerpt"`
 	ReadableImage    string   `json:"readable_image"`
 	ReadableLang     string   `json:"readable_lang"`
+	ReadableLength   int      `json:"readable_length"`
 	ReadableTitle    string   `json:"readable_title"`
 	ReadableByline   string   `json:"readable_byline"`
 	ReadableSiteName string   `json:"readable_site_name"`

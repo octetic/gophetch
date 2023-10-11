@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net/url"
 	"strings"
+	"unicode/utf8"
 
 	"github.com/microcosm-cc/bluemonday"
 	"golang.org/x/net/html"
@@ -98,10 +99,12 @@ func (e *Extractor) ExtractMetadata(node *html.Node, targetURL *url.URL) (metada
 			meta.ReadableText = value[2]
 			meta.ReadableImage = value[3]
 			meta.ReadableLang = value[4]
+			meta.ReadableLength = utf8.RuneCountInString(value[2])
 			meta.ReadableTitle = value[5]
 			meta.ReadableByline = value[6]
 			meta.ReadableSiteName = value[7]
 			meta.IsReadable = value[8] == "true"
+
 		case "site_name":
 			meta.SiteName = Normalize(value[0])
 		case "title":
