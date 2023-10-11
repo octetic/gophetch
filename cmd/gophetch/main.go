@@ -47,7 +47,7 @@ func main() {
 
 	if *showVersion {
 		fmt.Printf("\nGoPhetch\n")
-		fmt.Printf("Version: %s\n", "0.0.1")
+		fmt.Printf("Version: %s\n", "0.0.2")
 		os.Exit(0)
 	}
 
