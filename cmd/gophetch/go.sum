@@ -20,8 +20,8 @@ github.com/microcosm-cc/bluemonday v1.0.25 h1:4NEwSfiJ+Wva0VxN5B8OwMicaJvD8r9tlJ
 github.com/microcosm-cc/bluemonday v1.0.25/go.mod h1:ZIOjCQp1OrzBBPIJmfX4qDYFuhU02nx4bn030ixfHLE=
 github.com/peterbourgon/ff/v3 v3.4.0 h1:QBvM/rizZM1cB0p0lGMdmR7HxZeI/ZrBWB4DqLkMUBc=
 github.com/peterbourgon/ff/v3 v3.4.0/go.mod h1:zjJVUhx+twciwfDl0zBcFzl4dW8axCRyXE/eKY9RztQ=
-github.com/pixiesys/gophetch v0.0.0-20231011142528-cbd920c4760d h1:11ZBSKj4VKEivuUT49XI9lcDG9zB/IwnUoiKrcYeOE0=
-github.com/pixiesys/gophetch v0.0.0-20231011142528-cbd920c4760d/go.mod h1:zukYoeQ3lSNCVyRHyNeCh9WRxm8gubJMfB8wmAr26EA=
+github.com/pixiesys/gophetch v0.0.0-20231011144843-786b123044d2 h1:BCiFHs9V60NZa8n2Ukn+ZPLRRWAZyTGb8U4NuX58LMo=
+github.com/pixiesys/gophetch v0.0.0-20231011144843-786b123044d2/go.mod h1:zukYoeQ3lSNCVyRHyNeCh9WRxm8gubJMfB8wmAr26EA=
 github.com/pmezard/go-difflib v1.0.0 h1:4DBwDE0NGyQoBHbLQYPwSUPoCMWR5BEzIk/f1lZbAQM=
 github.com/pmezard/go-difflib v1.0.0/go.mod h1:iKH77koFhYxTK1pcRnkKkqfTogsbg7gZNVY4sRDYZ/4=
 github.com/sergi/go-diff v1.1.0 h1:we8PVUC3FE2uYfodKH/nBHMSetSfHDR6scGdBi+erh0=

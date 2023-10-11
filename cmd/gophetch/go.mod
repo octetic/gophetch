@@ -4,7 +4,7 @@ go 1.21.1
 
 require (
 	github.com/peterbourgon/ff/v3 v3.4.0
-	github.com/pixiesys/gophetch v0.0.0-20231011142528-cbd920c4760d
+	github.com/pixiesys/gophetch v0.0.0-20231011144843-786b123044d2
 )
 
 require (
