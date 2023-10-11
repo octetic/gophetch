@@ -1,5 +1,6 @@
 package rules
 
+// AuthorRule is the rule for extracting the author information from a page.
 type AuthorRule struct {
 	BaseRule
 }

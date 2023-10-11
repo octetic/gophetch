@@ -19,6 +19,7 @@ type SelectorInfo struct {
 	Selector string
 }
 
+// ExtractJSONLD extracts the given JSON-LD attribute from the given document.
 func ExtractJSONLD(node *html.Node, _ *url.URL, selectors []string) ExtractResult {
 	jsonLdNodes := cascadia.QueryAll(node, cascadia.MustCompile(`script[type="application/ld+json"]`))
 	for _, jsonLdNode := range jsonLdNodes {
@@ -55,6 +56,7 @@ func ExtractJSONLD(node *html.Node, _ *url.URL, selectors []string) ExtractResul
 	return ExtractResult{}
 }
 
+// ExtractCSS extracts the given CSS selector from the given document.
 func ExtractCSS(node *html.Node, _ *url.URL, selectors []string) ExtractResult {
 	for _, selector := range selectors {
 		cssNode := cascadia.Query(node, cascadia.MustCompile(selector))
@@ -73,7 +75,7 @@ func ExtractCSS(node *html.Node, _ *url.URL, selectors []string) ExtractResult {
 	return ExtractResult{}
 }
 
-// ExtractAttr extracts the given attribute from the given document.
+// ExtractAttr extracts a selector from the given document using the given attribute.
 func ExtractAttr(attribute string) ExtractFunc {
 	return func(node *html.Node, _ *url.URL, selectors []string) ExtractResult {
 		for _, selector := range selectors {

@@ -8,7 +8,7 @@ import (
 	"github.com/pixiesys/gophetch/metadata"
 )
 
-// ProxyHTTPFetcher is a fetcher that uses a proxy to fetch HTML from a URL.
+// ProxyHTTPFetcher is a fetcher that uses a proxy to fetch HTML from a URL. It does not return metadata.
 type ProxyHTTPFetcher struct {
 	ProxyURL string
 }

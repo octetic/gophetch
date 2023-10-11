@@ -1,5 +1,6 @@
 package rules
 
+// LangRule is the rule for extracting the language information from a page.
 type LangRule struct {
 	BaseRule
 }

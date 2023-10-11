@@ -1,5 +1,6 @@
 package metadata
 
+// Metadata is the struct that encapsulates the extracted metadata.
 type Metadata struct {
 	Audio            Audio    `json:"audio"`
 	Author           string   `json:"author"`
@@ -31,12 +32,14 @@ type Metadata struct {
 	Dynamic          map[string]any
 }
 
+// Meta is the struct that encapsulates the extracted metadata from <meta> tags
 type Meta struct {
 	Charset  string `json:"charset"`
 	Viewport string `json:"viewport"`
 	// ... Other meta properties
 }
 
+// Image is the struct that encapsulates the extracted metadata from <img> tags
 type Image struct {
 	URL        string `json:"url"`
 	Type       string `json:"type"`
@@ -46,6 +49,7 @@ type Image struct {
 	SizePretty string `json:"size_pretty"`
 }
 
+// Video is the struct that encapsulates the extracted metadata from <video> tags
 type Video struct {
 	URL            string  `json:"url"`
 	Type           string  `json:"type"`
@@ -57,6 +61,7 @@ type Video struct {
 	SizePretty     string  `json:"size_pretty"`
 }
 
+// Audio is the struct that encapsulates the extracted metadata from <audio> tags
 type Audio struct {
 	URL            string  `json:"url"`
 	Type           string  `json:"type"`

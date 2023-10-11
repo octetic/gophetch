@@ -8,6 +8,8 @@ import (
 	"github.com/pixiesys/gophetch/metadata"
 )
 
+// StandardHTTPFetcher is the struct that encapsulates the standard HTTP fetcher using the standard library.
+// It does not support metadata.
 type StandardHTTPFetcher struct{}
 
 func (s *StandardHTTPFetcher) Name() string {

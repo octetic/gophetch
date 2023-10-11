@@ -8,6 +8,7 @@ import (
 	"golang.org/x/net/html"
 )
 
+// CanonicalRule is the rule for extracting the canonical URL of a page.
 type CanonicalRule struct {
 	BaseRule
 }

@@ -6,6 +6,7 @@ import (
 	"golang.org/x/net/html"
 )
 
+// FeedRule is the rule for extracting the feed URL of a page. It will respond with an array of feed URLs it found.
 type FeedRule struct {
 	BaseRule
 }

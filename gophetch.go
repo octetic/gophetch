@@ -1,3 +1,4 @@
+// Package gophetch is a library for fetching and extracting metadata from HTML pages.
 package gophetch
 
 import (
@@ -14,6 +15,7 @@ import (
 	"github.com/pixiesys/gophetch/sites"
 )
 
+// Gophetch is the main struct that encapsulates the parser, extractor, and fetchers.
 type Gophetch struct {
 	Parser       *Parser
 	Extractor    *Extractor
@@ -21,7 +23,8 @@ type Gophetch struct {
 	SiteRegistry map[string]sites.Site
 }
 
-type FetchedData struct {
+// Result is the struct that encapsulates the extracted metadata, along with the response data.
+type Result struct {
 	HTMLNode    *html.Node
 	Headers     map[string][]string
 	IsHTML      bool
@@ -32,6 +35,7 @@ type FetchedData struct {
 	FetcherName string
 }
 
+// New creates a new Gophetch struct with the provided fetchers.
 func New(fetchers ...fetchers.HTMLFetcher) *Gophetch {
 	g := &Gophetch{
 		Parser:       NewParser(),
@@ -43,10 +47,14 @@ func New(fetchers ...fetchers.HTMLFetcher) *Gophetch {
 	return g
 }
 
-func (g *Gophetch) FetchAndExtractFromReader(r io.Reader, targetURL string) (FetchedData, error) {
+// The ReadAndParse method accepts two parameters: an io.Reader containing the HTML to be parsed, and a
+// target URL string. It reads the HTML content from the provided io.Reader, parses it to extract metadata, and
+// encapsulates the extracted metadata, along with the response data, into a Result struct which is then returned.
+// This method is useful when the HTML content is already available and does not need to be fetched from the internet.
+func (g *Gophetch) ReadAndParse(r io.Reader, targetURL string) (Result, error) {
 	err := g.Parser.Parse(r, nil, targetURL)
 	if err != nil {
-		return FetchedData{
+		return Result{
 			HTMLNode:    g.Parser.Node(),
 			Headers:     g.Parser.Headers(),
 			IsHTML:      g.Parser.IsHTML(),
@@ -57,7 +65,7 @@ func (g *Gophetch) FetchAndExtractFromReader(r io.Reader, targetURL string) (Fet
 		}, err
 	}
 
-	fetchedData := FetchedData{
+	fetchedData := Result{
 		HTMLNode:    g.Parser.Node(),
 		Headers:     g.Parser.Headers(),
 		IsHTML:      g.Parser.IsHTML(),
@@ -76,8 +84,11 @@ func (g *Gophetch) FetchAndExtractFromReader(r io.Reader, targetURL string) (Fet
 	return fetchedData, nil
 }
 
-// FetchAndExtractFromURL fetches and extracts data from a URL using the available fetchers
-func (g *Gophetch) FetchAndExtractFromURL(targetURL string) (FetchedData, error) {
+// The FetchAndParse method accepts a target URL string as its parameter. It initiates an HTTP request to fetch
+// the HTML content from the specified URL, parses the fetched HTML to extract metadata, and encapsulates the
+// extracted metadata, along with the response data, into a Result struct which is then returned. This method is
+// useful when the HTML content needs to be fetched from the internet before parsing.
+func (g *Gophetch) FetchAndParse(targetURL string) (Result, error) {
 	var err error
 	var body io.ReadCloser
 	var resp *http.Response
@@ -101,9 +112,9 @@ func (g *Gophetch) FetchAndExtractFromURL(targetURL string) (FetchedData, error)
 	}
 
 	if err != nil {
-		return FetchedData{}, err
+		return Result{}, err
 	} else if resp == nil || body == nil {
-		return FetchedData{}, fmt.Errorf("unable to fetch HTML from %s", targetURL)
+		return Result{}, fmt.Errorf("unable to fetch HTML from %s", targetURL)
 	}
 
 	defer func(body io.ReadCloser) {
@@ -112,10 +123,10 @@ func (g *Gophetch) FetchAndExtractFromURL(targetURL string) (FetchedData, error)
 
 	err = g.Parser.Parse(body, resp, targetURL)
 	if err != nil {
-		return FetchedData{}, err
+		return Result{}, err
 	}
 
-	fetchedData := FetchedData{
+	fetchedData := Result{
 		HTMLNode:    g.Parser.Node(),
 		Headers:     g.Parser.Headers(),
 		IsHTML:      g.Parser.IsHTML(),
@@ -151,6 +162,8 @@ func (g *Gophetch) FetchAndExtractFromURL(targetURL string) (FetchedData, error)
 	return fetchedData, nil
 }
 
+// RegisterSite registers a site with the Gophetch instance. This allows the Gophetch instance to apply
+// site-specific rules when extracting metadata from the HTML content.
 func (g *Gophetch) RegisterSite(site sites.Site) {
 	g.SiteRegistry[site.DomainKey()] = site
 }

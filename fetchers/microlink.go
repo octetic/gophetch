@@ -33,6 +33,8 @@ func (d MicrolinkDataQueryRule) AsMap(prefix string) map[string]string {
 	}
 }
 
+// MicrolinkFetcher is the struct that encapsulates the microlink.io fetcher. It is responsible for fetching the
+// HTML from the given URL. This fetcher returns metadata.
 type MicrolinkFetcher struct {
 	AdBlock   bool
 	APIKey    string

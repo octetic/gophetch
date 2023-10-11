@@ -1,5 +1,6 @@
 package rules
 
+// DescriptionRule is the rule for extracting the description information from a page.
 type DescriptionRule struct {
 	BaseRule
 }

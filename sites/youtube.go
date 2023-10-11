@@ -2,6 +2,7 @@ package sites
 
 import "github.com/pixiesys/gophetch/rules"
 
+// YouTube is a site overrider for YouTube data extraction.
 type YouTube struct{}
 
 func (yt YouTube) DomainKey() string {

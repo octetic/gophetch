@@ -1,5 +1,6 @@
 package rules
 
+// SiteNameRule is the rule for extracting the site name information from a page.
 type SiteNameRule struct {
 	BaseRule
 }

@@ -9,6 +9,7 @@ import (
 
 var ErrInvalidImageFormat = errors.New("invalid image format")
 
+// LeadImageRule is the rule for extracting the lead image from a page.
 type LeadImageRule struct {
 	BaseRule
 }

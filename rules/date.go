@@ -1,5 +1,6 @@
 package rules
 
+// DateRule is the rule for extracting the date information from a page.
 type DateRule struct {
 	BaseRule
 }

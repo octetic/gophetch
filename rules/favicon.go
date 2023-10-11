@@ -7,6 +7,7 @@ import (
 	"golang.org/x/net/html"
 )
 
+// FaviconRule is the rule for extracting the favicon URL of a page.
 type FaviconRule struct {
 	BaseRule
 }

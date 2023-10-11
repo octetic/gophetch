@@ -9,7 +9,8 @@ import (
 
 var ErrValueNotFound = errors.New("no value found")
 
-// Rule is the interface for all rules
+// A Rule is a rule for extracting a value from a node. It encapsulates multiple strategies for extracting a value.
+// Each strategy is tried in order of priority until a value is found, or all strategies have been tried.
 type Rule interface {
 	// Extract extracts the value from the node
 	Extract(node *html.Node, targetURL *url.URL) (ExtractResult, error)

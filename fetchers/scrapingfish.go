@@ -9,6 +9,8 @@ import (
 	"github.com/pixiesys/gophetch/metadata"
 )
 
+// ScrapingfishFetcher is the struct that encapsulates the scrapingfish.com fetcher. It is responsible for fetching the
+// HTML from the given URL. This fetcher does not return metadata.
 type ScrapingfishFetcher struct {
 	APIKey string
 }

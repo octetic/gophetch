@@ -1,5 +1,6 @@
 package rules
 
+// PublisherRule is the rule for extracting the publisher information from a page.
 type PublisherRule struct {
 	BaseRule
 }

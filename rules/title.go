@@ -1,5 +1,6 @@
 package rules
 
+// TitleRule is the rule for extracting the title information from a page.
 type TitleRule struct {
 	BaseRule
 }

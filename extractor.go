@@ -13,11 +13,13 @@ import (
 	"github.com/pixiesys/gophetch/sites"
 )
 
+// Extractor is the struct that encapsulates the rules used to extract metadata from HTML.
 type Extractor struct {
 	Rules  map[string]rules.Rule
 	Errors []error
 }
 
+// NewExtractor creates a new Extractor struct with the default rules.
 func NewExtractor() *Extractor {
 	return &Extractor{
 		Rules: map[string]rules.Rule{
@@ -37,6 +39,7 @@ func NewExtractor() *Extractor {
 	}
 }
 
+// ExtractMetadata extracts metadata from the given HTML node. The url parameter is used to fix relative paths.
 func (e *Extractor) ExtractMetadata(node *html.Node, targetURL *url.URL) (metadata.Metadata, error) {
 	var meta metadata.Metadata
 
@@ -106,6 +109,7 @@ func (e *Extractor) ExtractMetadata(node *html.Node, targetURL *url.URL) (metada
 	return meta, nil
 }
 
+// ApplySiteSpecificRules applies the custom rules for the given site.
 func (e *Extractor) ApplySiteSpecificRules(site sites.Site) {
 	for key, customRule := range site.Rules() {
 		// Replace the default rule with the custom one for this key
