@@ -39,10 +39,10 @@ func (r *FaviconRule) Extract(node *html.Node, targetURL *url.URL) (ExtractResul
 	}
 
 	// If no favicon was found, try to extract it from the /favicon.ico file.
-	faviconUrl := fmt.Sprintf("%s://%s/favicon.ico", targetURL.Scheme, targetURL.Host)
-	if IsValidImage(faviconUrl) {
+	faviconURL := fmt.Sprintf("%s://%s/favicon.ico", targetURL.Scheme, targetURL.Host)
+	if IsValidImage(faviconURL) {
 		return ExtractResult{
-			Value: []string{faviconUrl},
+			Value: []string{faviconURL},
 			Selector: SelectorInfo{
 				Attr:     "href",
 				InMeta:   false,

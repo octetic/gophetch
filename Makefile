@@ -19,16 +19,16 @@ help:
 ## tidy: format code and tidy modfile
 .PHONY: tidy
 tidy:
-	go fmt ./...
-	go mod tidy -v
+	@(go fmt ./... && go mod tidy -v)
+	@(cd cmd/gophetch && go get -u && go fmt ./... && go mod tidy -v)
 
 ## audit: run quality control checks
 .PHONY: audit
 audit:
-	go vet ./...
-	go run honnef.co/go/tools/cmd/staticcheck@latest -checks=all,-ST1000,-U1000 ./...
-	go test -race -vet=off ./...
-	go mod verify
+	@(go vet ./... && \
+		go run honnef.co/go/tools/cmd/staticcheck@latest -checks=all,-ST1000,-U1000 ./... && \
+		go test -race -vet=off ./... && \
+		go mod verify)
 
 ## lint: run linter
 .PHONY: lint
@@ -52,9 +52,7 @@ test:
 ## build: build the cmd/web application
 .PHONY: build
 build:
-	cd cmd/gophetch && go get -u
-	cd cmd/gophetch && go mod verify
-	cd cmd/gophetch && go build -ldflags='-s' -o=${PROJECT_ROOT}/bin/gophetch
+	@(cd cmd/gophetch && go get -u && go mod verify && go build -v -ldflags='-s' -o=${PROJECT_ROOT}/bin/gophetch)
 
 ## serve-docs: serve the docs on localhost:6060
 .PHONY: serve-docs
