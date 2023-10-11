@@ -1,4 +1,4 @@
-package extractor
+package gophetch
 
 import (
 	"fmt"
@@ -8,7 +8,6 @@ import (
 	"github.com/microcosm-cc/bluemonday"
 	"golang.org/x/net/html"
 
-	"github.com/pixiesys/gophetch/metadata"
 	"github.com/pixiesys/gophetch/rules"
 	"github.com/pixiesys/gophetch/sites"
 )
@@ -18,7 +17,7 @@ type Extractor struct {
 	Errors []error
 }
 
-func New() *Extractor {
+func NewExtractor() *Extractor {
 	return &Extractor{
 		Rules: map[string]rules.Rule{
 			"author":      rules.NewAuthorRule(),
@@ -37,18 +36,18 @@ func New() *Extractor {
 	}
 }
 
-func (e *Extractor) ExtractMetadata(node *html.Node, targetURL *url.URL) (metadata.Metadata, error) {
-	var meta metadata.Metadata
+func (e *Extractor) ExtractMetadata(node *html.Node, targetURL *url.URL) (Metadata, error) {
+	var meta Metadata
 
 	if node == nil {
-		return metadata.Metadata{}, fmt.Errorf("node is nil")
+		return Metadata{}, fmt.Errorf("node is nil")
 	}
 
 	// Get the HTML as a string
 	var sb strings.Builder
 	err := html.Render(&sb, node)
 	if err != nil {
-		return metadata.Metadata{}, err
+		return Metadata{}, err
 	}
 	meta.HTML = sb.String()
 

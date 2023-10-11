@@ -4,7 +4,7 @@ import (
 	"io"
 	"net/http"
 
-	"github.com/pixiesys/gophetch/metadata"
+	"github.com/pixiesys/gophetch"
 )
 
 type HTMLFetcher interface {
@@ -15,5 +15,5 @@ type HTMLFetcher interface {
 	// HasMetadata returns true if the fetcher has metadata.
 	HasMetadata() bool
 	// Metadata returns the metadata for the fetcher.
-	Metadata() metadata.Metadata
+	Metadata() gophetch.Metadata
 }

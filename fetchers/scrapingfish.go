@@ -6,7 +6,7 @@ import (
 	"net/http"
 	"net/url"
 
-	"github.com/pixiesys/gophetch/metadata"
+	"github.com/pixiesys/gophetch"
 )
 
 type ScrapingfishFetcher struct {
@@ -54,6 +54,6 @@ func (s *ScrapingfishFetcher) HasMetadata() bool {
 	return false
 }
 
-func (s *ScrapingfishFetcher) Metadata() metadata.Metadata {
-	return metadata.Metadata{}
+func (s *ScrapingfishFetcher) Metadata() gophetch.Metadata {
+	return gophetch.Metadata{}
 }

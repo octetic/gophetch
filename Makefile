@@ -9,7 +9,7 @@ PROJECT_ROOT := $(shell pwd)
 ## help: print this help message
 .PHONY: help
 help:
-    @echo 'Usage:'
+	@echo 'Usage:'
 	@sed -n 's/^##//p' ${MAKEFILE_LIST} | column -t -s ':' |  sed -e 's/^/ /'
 
 # ==================================================================================== #
@@ -54,3 +54,8 @@ test:
 build:
 	cd cmd/gophetch && go mod verify
 	cd cmd/gophetch && go build -ldflags='-s' -o=${PROJECT_ROOT}/bin/gophetch
+
+## serve-docs: serve the docs on localhost:6060
+.PHONY: serve-docs
+serve-docs:
+	godoc -http=:6060

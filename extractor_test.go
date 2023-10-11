@@ -1,4 +1,4 @@
-package extractor_test
+package gophetch_test
 
 import (
 	"net/url"
@@ -8,15 +8,14 @@ import (
 	"github.com/stretchr/testify/assert"
 	"golang.org/x/net/html"
 
-	"github.com/pixiesys/gophetch/extractor"
-	"github.com/pixiesys/gophetch/metadata"
+	"github.com/pixiesys/gophetch"
 )
 
 func TestExtractorIntegration(t *testing.T) {
 	testCases := []struct {
 		desc     string
 		mockHTML string
-		expected metadata.Metadata
+		expected gophetch.Metadata
 	}{
 		{
 			desc: "Full HTML Page",
@@ -34,7 +33,7 @@ func TestExtractorIntegration(t *testing.T) {
 				</body>
 				</html>
 			`,
-			expected: metadata.Metadata{
+			expected: gophetch.Metadata{
 				Author:      "John Schema",
 				Title:       "OG Title",
 				Description: "OG Description",
@@ -44,7 +43,7 @@ func TestExtractorIntegration(t *testing.T) {
 		// Add more test cases as needed
 	}
 
-	ext := extractor.New()
+	ext := gophetch.NewExtractor()
 	targetURL, err := url.Parse("https://example.com")
 	if err != nil {
 		t.Fatal(err)
@@ -74,7 +73,7 @@ func TestExtractorBoundary(t *testing.T) {
 	testCases := []struct {
 		desc     string
 		mockHTML string
-		expected metadata.Metadata
+		expected gophetch.Metadata
 	}{
 		{
 			desc: "Missing All Tags",
@@ -87,7 +86,7 @@ func TestExtractorBoundary(t *testing.T) {
 				</body>
 				</html>
 			`,
-			expected: metadata.Metadata{},
+			expected: gophetch.Metadata{},
 		},
 		{
 			desc: "Empty Strings",
@@ -104,7 +103,7 @@ func TestExtractorBoundary(t *testing.T) {
 				</body>
 				</html>
 			`,
-			expected: metadata.Metadata{},
+			expected: gophetch.Metadata{},
 		},
 		{
 			desc: "Null Values",
@@ -121,7 +120,7 @@ func TestExtractorBoundary(t *testing.T) {
 				</body>
 				</html>
 			`,
-			expected: metadata.Metadata{},
+			expected: gophetch.Metadata{},
 		},
 		{
 			desc: "Malformed HTML",
@@ -134,14 +133,14 @@ func TestExtractorBoundary(t *testing.T) {
 				<body>
 				</body>
 			`,
-			expected: metadata.Metadata{
+			expected: gophetch.Metadata{
 				Title: "OG Title",
 			},
 		},
 		// Add more test cases as needed
 	}
 
-	ext := extractor.New()
+	ext := gophetch.NewExtractor()
 	targetURL, err := url.Parse("https://example.com")
 	if err != nil {
 		t.Fatal(err)

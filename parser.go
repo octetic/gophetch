@@ -1,4 +1,4 @@
-package parser
+package gophetch
 
 import (
 	"io"
@@ -19,7 +19,7 @@ type Parser struct {
 	url      *url.URL
 }
 
-func New() *Parser {
+func NewParser() *Parser {
 	return &Parser{}
 }
 

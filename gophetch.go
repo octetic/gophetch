@@ -9,16 +9,13 @@ import (
 
 	"golang.org/x/net/html"
 
-	"github.com/pixiesys/gophetch/extractor"
 	"github.com/pixiesys/gophetch/fetchers"
-	"github.com/pixiesys/gophetch/metadata"
-	"github.com/pixiesys/gophetch/parser"
 	"github.com/pixiesys/gophetch/sites"
 )
 
 type Gophetch struct {
-	Parser       *parser.Parser
-	Extractor    *extractor.Extractor
+	Parser       *Parser
+	Extractor    *Extractor
 	Fetchers     []fetchers.HTMLFetcher
 	SiteRegistry map[string]sites.Site
 }
@@ -27,7 +24,7 @@ type FetchedData struct {
 	HTMLNode    *html.Node
 	Headers     map[string][]string
 	IsHTML      bool
-	Metadata    metadata.Metadata
+	Metadata    Metadata
 	MimeType    string
 	Response    *http.Response
 	StatusCode  int
@@ -36,8 +33,8 @@ type FetchedData struct {
 
 func New(fetchers ...fetchers.HTMLFetcher) *Gophetch {
 	g := &Gophetch{
-		Parser:       parser.New(),
-		Extractor:    extractor.New(),
+		Parser:       NewParser(),
+		Extractor:    NewExtractor(),
 		Fetchers:     fetchers,
 		SiteRegistry: make(map[string]sites.Site),
 	}
@@ -90,7 +87,7 @@ func (g *Gophetch) FetchAndExtractFromURL(targetURL string) (FetchedData, error)
 		g.Fetchers = append(g.Fetchers, &fetchers.StandardHTTPFetcher{})
 	}
 
-	var data metadata.Metadata
+	var data Metadata
 	hasData := false
 	for _, fetcher := range g.Fetchers {
 		resp, body, err = fetcher.FetchHTML(targetURL)
@@ -121,7 +118,7 @@ func (g *Gophetch) FetchAndExtractFromURL(targetURL string) (FetchedData, error)
 		HTMLNode:    g.Parser.Node(),
 		Headers:     g.Parser.Headers(),
 		IsHTML:      g.Parser.IsHTML(),
-		Metadata:    metadata.Metadata{},
+		Metadata:    Metadata{},
 		MimeType:    g.Parser.MimeType(),
 		Response:    resp,
 		StatusCode:  resp.StatusCode,
