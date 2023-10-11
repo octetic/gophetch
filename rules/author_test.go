@@ -2,6 +2,7 @@ package rules_test
 
 import (
 	"fmt"
+	"net/url"
 	"strings"
 	"testing"
 
@@ -15,23 +16,23 @@ func TestAuthorRuleSelectors(t *testing.T) {
 	testCases := []struct {
 		desc     string
 		mockHTML string
-		expected string
+		expected []string
 		error    error
 	}{
 		{
 			desc:     "Test with valid author.name in JSON-LD",
 			mockHTML: `<script type="application/ld+json">{"author": {"name": "John JSON-LD"}}</script>`,
-			expected: "John JSON-LD",
+			expected: []string{"John JSON-LD"},
 		},
 		{
 			desc:     "Test with brand.name in JSON-LD",
 			mockHTML: `<script type="application/ld+json">{"brand": {"name": "Brand JSON-LD"}}</script>`,
-			expected: "Brand JSON-LD",
+			expected: []string{"Brand JSON-LD"},
 		},
 		{
 			desc:     "Test with creator.name in JSON-LD",
 			mockHTML: `<script type="application/ld+json">{"creator": {"name": "Creator JSON-LD"}}</script>`,
-			expected: "Creator JSON-LD",
+			expected: []string{"Creator JSON-LD"},
 		},
 		{
 			desc: "Test with multiple selectors, prioritizing JSON-LD",
@@ -39,27 +40,27 @@ func TestAuthorRuleSelectors(t *testing.T) {
 				<script type="application/ld+json">{"author": {"name": "Priority JSON-LD"}}</script>
 				<meta property="schema:author">John Schema</span>
 			`,
-			expected: "Priority JSON-LD",
+			expected: []string{"Priority JSON-LD"},
 		},
 		{
 			desc:     "Test with schema:author in span",
 			mockHTML: `<span property="schema:author">John Schema</span>`,
-			expected: "John Schema",
+			expected: []string{"John Schema"},
 		},
 		{
 			desc:     "Test with schema:author in meta",
 			mockHTML: `<meta property="schema:author" content="Meta Schema"/>`,
-			expected: "Meta Schema",
+			expected: []string{"Meta Schema"},
 		},
 		{
 			desc:     "Test with typeof schema:Person",
 			mockHTML: `<div typeof="schema:Person"><span property="schema:name">Person Schema</span></div>`,
-			expected: "Person Schema",
+			expected: []string{"Person Schema"},
 		},
 		{
 			desc:     "Test with dc:creator in span",
 			mockHTML: `<span property="dc:creator">John DC</span>`,
-			expected: "John DC",
+			expected: []string{"John DC"},
 		},
 		{
 			desc: "Test with multiple selectors, prioritizing schema:author in meta",
@@ -76,7 +77,7 @@ func TestAuthorRuleSelectors(t *testing.T) {
 				</body>
 				</html>
 			`,
-			expected: "Priority Author",
+			expected: []string{"Priority Author"},
 		},
 		{
 			desc: "Test no value found",
@@ -84,12 +85,16 @@ func TestAuthorRuleSelectors(t *testing.T) {
 				<span property="foo:bar">John Foo</span>
 				<span property="schema:foo">John Schema</span>
 			`,
-			expected: "",
+			expected: []string{},
 			error:    rules.ErrValueNotFound,
 		},
 	}
 
 	ar := rules.NewAuthorRule()
+	targetURL, err := url.Parse("https://example.com")
+	if err != nil {
+		t.Fatal(err)
+	}
 
 	for _, tC := range testCases {
 		t.Run(tC.desc, func(t *testing.T) {
@@ -100,7 +105,7 @@ func TestAuthorRuleSelectors(t *testing.T) {
 			}
 
 			// Call the AuthorRule's Extract method
-			result, err := ar.Extract(mockNode)
+			result, err := ar.Extract(mockNode, targetURL)
 			if err != nil {
 				assert.Equal(t, tC.error, err, fmt.Sprintf("Want error %v, got %v", tC.error, err))
 			} else {
