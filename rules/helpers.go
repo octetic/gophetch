@@ -1,35 +1,74 @@
 package rules
 
 import (
-	"bytes"
-	"image/gif"
-	"image/jpeg"
-	"image/png"
+	"fmt"
 	"io"
 	"net/http"
 	"net/url"
 	"strings"
 
-	ico "github.com/biessek/golang-ico"
 	"github.com/microcosm-cc/bluemonday"
 	"golang.org/x/net/html"
 )
 
-func IsValidImage(url string) bool {
-	valid, err := ValidateImage(url)
+var validImageMIMETypes = map[string]struct{}{
+	"image/jpeg":               {},
+	"image/png":                {},
+	"image/gif":                {},
+	"image/bmp":                {},
+	"image/x-windows-bmp":      {},
+	"image/webp":               {},
+	"image/svg+xml":            {},
+	"image/tiff":               {},
+	"image/vnd.microsoft.icon": {},
+	"image/x-icon":             {},
+	"image/avif":               {},
+	"image/heif":               {},
+	"image/heic":               {},
+}
+
+var validFaviconMIMETypes = map[string]struct{}{
+	"image/x-icon":             {},
+	"image/vnd.microsoft.icon": {},
+	"image/jpeg":               {},
+	"image/png":                {},
+	"image/gif":                {},
+	"image/bmp":                {},
+	"image/x-windows-bmp":      {},
+	"image/webp":               {},
+	"image/svg+xml":            {},
+}
+
+func isValidImageMIMEType(mimeType string) bool {
+	_, ok := validImageMIMETypes[mimeType]
+	return ok
+}
+
+func isValidFaviconMIMEType(mimeType string) bool {
+	_, ok := validFaviconMIMETypes[mimeType]
+	return ok
+}
+
+//func IsValidImage(url string) bool {
+//	valid, err := ValidateImage(url, false)
+//	if err != nil {
+//		return false
+//	}
+//	return valid
+//}
+
+// IsValidFavicon checks if the given URL is a valid favicon.
+func IsValidFavicon(url string) bool {
+	valid, err := ValidateImage(url, true)
 	if err != nil {
 		return false
 	}
 	return valid
 }
 
-func ValidateImage(url string) (bool, error) {
-	if url == "" {
-		return false, nil
-	}
-
-	// Make a GET request to the image URL.
-	resp, err := http.Get(url)
+// ValidateImage checks if the given URL is a valid image.
+func ValidateImage(url string, faviconOnly bool) (bool, error) {
+	resp, err := http.Head(url)
 	if err != nil {
 		return false, err
 	}
@@ -37,38 +76,27 @@ func ValidateImage(url string) (bool, error) {
 		_ = Body.Close()
 	}(resp.Body)
 
-	// Read in the image as bytes
-	data, err := io.ReadAll(resp.Body)
-	if err != nil {
-		return false, err
+	// Check for a successful or redirected response
+	if resp.StatusCode < 200 || resp.StatusCode >= 400 {
+		return false, fmt.Errorf("HTTP error: %s", resp.Status)
 	}
 
-	// Check the content type is one of the valid favicon types.
-	contentType := http.DetectContentType(data)
-	switch {
-	case strings.HasPrefix(contentType, "image/png"):
-		_, err = png.Decode(bytes.NewReader(data))
-	case strings.HasPrefix(contentType, "image/jpeg"):
-		_, err = jpeg.Decode(bytes.NewReader(data))
-	case strings.HasPrefix(contentType, "image/gif"):
-		_, err = gif.Decode(bytes.NewReader(data))
-	//case strings.HasPrefix(contentType, "image/webp"):
-	//	_, err = webp.Decode(bytes.NewReader(data))
-	case strings.HasPrefix(contentType, "image/x-icon"), strings.HasPrefix(contentType, "image/vnd.microsoft.icon"):
-		_, err = ico.Decode(bytes.NewReader(data))
-	default:
-		return false, ErrInvalidImageFormat
+	contentType := resp.Header.Get("Content-Type")
+
+	if faviconOnly {
+		if !isValidFaviconMIMEType(contentType) {
+			return false, fmt.Errorf("invalid MIME type: %s", contentType)
+		}
+	} else {
+		if !isValidImageMIMEType(contentType) {
+			return false, fmt.Errorf("invalid MIME type: %s", contentType)
+		}
 	}
 
-	// We'll get here if the content type was one of the valid types. If there was an error decoding the image, it was invalid.
-	if err != nil {
-		return false, err
-	}
-
-	// If we got here, the image is valid.
 	return true, nil
 }
 
+// FixRelativePath converts a relative path to an absolute path for the given URL.
 func FixRelativePath(u *url.URL, path string) string {
 	if strings.HasPrefix(path, "http") {
 		return path
