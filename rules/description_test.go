@@ -17,23 +17,23 @@ func TestDescriptionRuleSelectors(t *testing.T) {
 	testCases := []struct {
 		desc     string
 		mockHTML string
-		expected []string
+		expected string
 		error    error
 	}{
 		{
 			desc:     "Test with og:description in meta",
 			mockHTML: `<meta property="og:description" content="OG Description"/>`,
-			expected: []string{"OG Description"},
+			expected: "OG Description",
 		},
 		{
 			desc:     "Test with description in JSON-LD",
 			mockHTML: `<script type="application/ld+json">{"description": "JSON-LD Description"}</script>`,
-			expected: []string{"JSON-LD Description"},
+			expected: "JSON-LD Description",
 		},
 		{
 			desc:     "Test with .post-description class",
 			mockHTML: `<div class="post-description">Post Description</div>`,
-			expected: []string{"Post Description"},
+			expected: "Post Description",
 		},
 		{
 			desc: "Test with multiple selectors, prioritizing og:description",
@@ -41,14 +41,14 @@ func TestDescriptionRuleSelectors(t *testing.T) {
 				<meta property="og:description" content="Priority OG Description"/>
 				<div class="post-description">Post Description</div>
 			`,
-			expected: []string{"Priority OG Description"},
+			expected: "Priority OG Description",
 		},
 		{
 			desc: "Test no description found",
 			mockHTML: `
 				<div class="post-foo">Post Description</div>
 			`,
-			expected: []string{},
+			expected: "",
 			error:    rules.ErrValueNotFound,
 		},
 	}
@@ -72,7 +72,7 @@ func TestDescriptionRuleSelectors(t *testing.T) {
 			if err != nil {
 				assert.Equal(t, tC.error, err, fmt.Sprintf("Want error %v, got %v", tC.error, err))
 			} else {
-				assert.Equal(t, tC.expected, result.Value, fmt.Sprintf("Want %s, got %s", tC.expected, result.Value))
+				assert.Equal(t, tC.expected, result.Value(), fmt.Sprintf("Want %s, got %s", tC.expected, result.Value()))
 			}
 		})
 	}

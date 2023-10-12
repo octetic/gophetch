@@ -17,28 +17,28 @@ func TestTitleRuleSelectors(t *testing.T) {
 	testCases := []struct {
 		desc     string
 		mockHTML string
-		expected []string
+		expected string
 		error    error
 	}{
 		{
 			desc:     "Test with og:title in meta",
 			mockHTML: `<meta property="og:title" content="OG Title"/>`,
-			expected: []string{"OG Title"},
+			expected: "OG Title",
 		},
 		{
 			desc:     "Test with title tag",
 			mockHTML: `<title>HTML Title</title>`,
-			expected: []string{"HTML Title"},
+			expected: "HTML Title",
 		},
 		{
 			desc:     "Test with headline in JSON-LD",
 			mockHTML: `<script type="application/ld+json">{"headline": "JSON-LD Title"}</script>`,
-			expected: []string{"JSON-LD Title"},
+			expected: "JSON-LD Title",
 		},
 		{
 			desc:     "Test with .post-title class",
 			mockHTML: `<div class="post-title">Post Title</div>`,
-			expected: []string{"Post Title"},
+			expected: "Post Title",
 		},
 		{
 			desc: "Test with multiple selectors, prioritizing og:title",
@@ -53,14 +53,14 @@ func TestTitleRuleSelectors(t *testing.T) {
 				</body>
 				</html>
 			`,
-			expected: []string{"Priority OG Title"},
+			expected: "Priority OG Title",
 		},
 		{
 			desc: "Test no value found",
 			mockHTML: `
 				<meta property="foo:bar" content="2022-01-01T15:04:05Z"/>
 			`,
-			expected: []string{},
+			expected: "",
 			error:    rules.ErrValueNotFound,
 		},
 	}
@@ -84,7 +84,7 @@ func TestTitleRuleSelectors(t *testing.T) {
 			if err != nil {
 				assert.Equal(t, tC.error, err, fmt.Sprintf("Want error %v, got %v", tC.error, err))
 			} else {
-				assert.Equal(t, tC.expected, result.Value, fmt.Sprintf("Want %s, got %s", tC.expected, result.Value))
+				assert.Equal(t, tC.expected, result.Value(), fmt.Sprintf("Want %s, got %s", tC.expected, result.Value()))
 			}
 
 		})

@@ -4,9 +4,7 @@ import (
 	"fmt"
 	"net/url"
 	"strings"
-	"unicode/utf8"
 
-	"github.com/microcosm-cc/bluemonday"
 	"golang.org/x/net/html"
 
 	"github.com/pixiesys/gophetch/metadata"
@@ -48,72 +46,47 @@ func (e *Extractor) ExtractMetadata(node *html.Node, targetURL *url.URL) (metada
 		return metadata.Metadata{}, fmt.Errorf("node is nil")
 	}
 
-	// Get the HTML as a string
-	var sb strings.Builder
-	err := html.Render(&sb, node)
+	doc, err := e.renderHTML(node)
 	if err != nil {
 		return metadata.Metadata{}, err
 	}
-	meta.HTML = sb.String()
+	meta.HTML = doc
 
 	for key, rule := range e.Rules {
-		//fmt.Printf("Extracting %s\n", key)
-		result, err := rule.Extract(node, targetURL)
+		result, err := e.ExtractRule(node, targetURL, rule)
 		if err != nil {
-			e.Errors = append(e.Errors, err)
+			e.handleError(err)
 			continue
-		} else if len(result.Value) == 0 || !result.Found {
+		} else if !result.Found() {
 			continue
 		}
 
-		value := result.Value
-
-		switch key {
-		case "author":
-			meta.Author = Normalize(value[0])
-		case "canonical":
-			canonicalURL := rules.FixRelativePath(targetURL, value[0])
-			meta.CanonicalURL = canonicalURL
-			meta.URL = canonicalURL
-		case "date":
-			meta.Date = Normalize(value[0])
-		case "description":
-			meta.Description = Normalize(value[0])
-		case "favicon":
-			meta.FaviconURL = rules.FixRelativePath(targetURL, value[0])
-		case "feed":
-			meta.FeedURLs = value
-		case "lang":
-			meta.Lang = Normalize(value[0])
-		case "lead_image":
-			meta.LeadImageURL = rules.FixRelativePath(targetURL, value[0])
-			meta.LeadImageInMeta = result.Selector.InMeta
-		case "publisher":
-			meta.Publisher = Normalize(value[0])
-		case "readable":
-			if len(value) != 9 {
-				return metadata.Metadata{}, fmt.Errorf("readable rule returned %d values, expected 9", len(value))
-			}
-			meta.ReadableExcerpt = value[0]
-			meta.ReadableHTML = value[1]
-			meta.ReadableText = value[2]
-			meta.ReadableImage = value[3]
-			meta.ReadableLang = value[4]
-			meta.ReadableLength = utf8.RuneCountInString(value[2])
-			meta.ReadableTitle = value[5]
-			meta.ReadableByline = value[6]
-			meta.ReadableSiteName = value[7]
-			meta.IsReadable = value[8] == "true"
-
-		case "site_name":
-			meta.SiteName = Normalize(value[0])
-		case "title":
-			meta.Title = Normalize(value[0])
-		default:
-			meta.Dynamic[key] = value
+		result.ApplyMetadata(key, targetURL, &meta)
+		if err != nil {
+			e.handleError(err)
 		}
 	}
+
 	return meta, nil
+}
+
+func (e *Extractor) ExtractRuleByKey(node *html.Node, targetURL *url.URL, key string) (rules.ExtractResult, error) {
+	rule, ok := e.Rules[key]
+	if !ok {
+		return rules.NewNoResult(), fmt.Errorf("rule %s not found", key)
+	}
+	return e.ExtractRule(node, targetURL, rule)
+}
+
+func (e *Extractor) ExtractRule(node *html.Node, targetURL *url.URL, rule rules.Rule) (rules.ExtractResult, error) {
+	result, err := rule.Extract(node, targetURL)
+	if err != nil {
+		return rules.NewNoResult(), err
+	}
+	if !result.Found() {
+		return rules.NewNoResult(), nil // or some sentinel error if needed
+	}
+	return result, nil
 }
 
 // ApplySiteSpecificRules applies the custom rules for the given site.
@@ -124,18 +97,15 @@ func (e *Extractor) ApplySiteSpecificRules(site sites.Site) {
 	}
 }
 
-// Normalize cleans up the extracted string, removing HTML tags,
-// decoding HTML entities, and trimming whitespace.
-func Normalize(input string) string {
-	// Strip HTML tags
-	p := bluemonday.StripTagsPolicy()
-	clean := p.Sanitize(input)
+func (e *Extractor) handleError(err error) {
+	e.Errors = append(e.Errors, err)
+}
 
-	// Decode HTML entities
-	decoded := html.UnescapeString(clean)
-
-	// Trim whitespace
-	normalized := strings.TrimSpace(decoded)
-
-	return normalized
+func (e *Extractor) renderHTML(node *html.Node) (string, error) {
+	var sb strings.Builder
+	err := html.Render(&sb, node)
+	if err != nil {
+		return "", err
+	}
+	return sb.String(), nil
 }

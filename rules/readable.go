@@ -2,7 +2,6 @@ package rules
 
 import (
 	"net/url"
-	"strconv"
 
 	"github.com/go-shiori/go-readability"
 	"golang.org/x/net/html"
@@ -38,7 +37,7 @@ func extractReadable(node *html.Node, targetURL *url.URL, _ []string) ExtractRes
 	// Using readability's article extraction routines as they are more reliable than ours
 	readabilityArticle, err := readability.FromDocument(node, targetURL)
 	if err != nil {
-		return ExtractResult{}
+		return NewNoResult()
 	}
 
 	excerpt := readabilityArticle.Excerpt
@@ -46,23 +45,23 @@ func extractReadable(node *html.Node, targetURL *url.URL, _ []string) ExtractRes
 		excerpt = excerpt[:255] + "..."
 	}
 
-	isReadable := strconv.FormatBool(readability.CheckDocument(node))
-	htmlContent := readabilityArticle.Content
-	textContent := readabilityArticle.TextContent
-	image := readabilityArticle.Image
-	lang := readabilityArticle.Language
-	title := readabilityArticle.Title
-	byline := readabilityArticle.Byline
-	siteName := readabilityArticle.SiteName
-
-	value := []string{excerpt, htmlContent, textContent, image, lang, title, byline, siteName, isReadable}
-	return ExtractResult{
-		Value: value,
-		Selector: SelectorInfo{
+	return NewReadableResult(
+		ReadableValue{
+			Excerpt:    excerpt,
+			HTML:       readabilityArticle.Content,
+			Text:       readabilityArticle.TextContent,
+			Image:      readabilityArticle.Image,
+			Lang:       readabilityArticle.Language,
+			Title:      readabilityArticle.Title,
+			Byline:     readabilityArticle.Byline,
+			SiteName:   readabilityArticle.SiteName,
+			IsReadable: readability.CheckDocument(node),
+		},
+		SelectorInfo{
 			Attr:     "readable",
 			InMeta:   false,
 			Selector: "readable",
 		},
-		Found: true,
-	}
+		true,
+	)
 }

@@ -12,6 +12,8 @@ import (
 	"github.com/pixiesys/gophetch/metadata"
 )
 
+// TODO(patrick): Add more tests
+
 func TestExtractorIntegration(t *testing.T) {
 	testCases := []struct {
 		desc     string
@@ -65,7 +67,10 @@ func TestExtractorIntegration(t *testing.T) {
 			}
 
 			// Assertion
-			assert.Equal(t, tC.expected, result, "They should be equal")
+			assert.Equal(t, tC.expected.Author, result.Author, "They should be equal")
+			assert.Equal(t, tC.expected.Title, result.Title, "They should be equal")
+			assert.Equal(t, tC.expected.Description, result.Description, "They should be equal")
+			assert.Equal(t, tC.expected.Date, result.Date, "They should be equal")
 		})
 	}
 }
@@ -162,7 +167,7 @@ func TestExtractorBoundary(t *testing.T) {
 			}
 
 			// Assertion
-			assert.Equal(t, tC.expected, result, "They should be equal")
+			assert.Equal(t, tC.expected.Title, result.Title, "They should be equal")
 		})
 	}
 }

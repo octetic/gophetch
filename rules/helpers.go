@@ -11,6 +11,8 @@ import (
 	"strings"
 
 	ico "github.com/biessek/golang-ico"
+	"github.com/microcosm-cc/bluemonday"
+	"golang.org/x/net/html"
 )
 
 func IsValidImage(url string) bool {
@@ -78,4 +80,20 @@ func FixRelativePath(u *url.URL, path string) string {
 		}
 		return u.Scheme + "://" + u.Host + "/" + path
 	}
+}
+
+// Normalize cleans up the extracted string, removing HTML tags,
+// decoding HTML entities, and trimming whitespace.
+func Normalize(input string) string {
+	// Strip HTML tags
+	p := bluemonday.StripTagsPolicy()
+	clean := p.Sanitize(input)
+
+	// Decode HTML entities
+	decoded := html.UnescapeString(clean)
+
+	// Trim whitespace
+	normalized := strings.TrimSpace(decoded)
+
+	return normalized
 }

@@ -16,28 +16,28 @@ func TestDateRuleSelectors(t *testing.T) {
 	testCases := []struct {
 		desc     string
 		mockHTML string
-		expected []string
+		expected string
 		error    error
 	}{
 		{
 			desc:     "Test with datePublished in JSON-LD",
 			mockHTML: `<script type="application/ld+json">{"datePublished": "2022-10-11"}</script>`,
-			expected: []string{"2022-10-11"},
+			expected: "2022-10-11",
 		},
 		{
 			desc:     "Test with article:published_time in meta",
 			mockHTML: `<meta property="article:published_time" content="2022-10-11T15:04:05Z"/>`,
-			expected: []string{"2022-10-11T15:04:05Z"},
+			expected: "2022-10-11T15:04:05Z",
 		},
 		{
 			desc:     "Test with time element",
 			mockHTML: `<time datetime="2022-10-11T15:04:05Z"></time>`,
-			expected: []string{"2022-10-11T15:04:05Z"},
+			expected: "2022-10-11T15:04:05Z",
 		},
 		{
 			desc:     "Test with .post-date class",
 			mockHTML: `<div class="post-date">2022-10-11</div>`,
-			expected: []string{"2022-10-11"},
+			expected: "2022-10-11",
 		},
 		{
 			desc: "Test with multiple selectors, prioritizing datePublished in JSON-LD",
@@ -45,7 +45,7 @@ func TestDateRuleSelectors(t *testing.T) {
 				<script type="application/ld+json">{"datePublished": "2022-10-11"}</script>
 				<meta property="article:published_time" content="2022-01-01T15:04:05Z"/>
 			`,
-			expected: []string{"2022-10-11"},
+			expected: "2022-10-11",
 		},
 		{
 			desc: "Test with multiple selectors, prioritizing article:published_time in meta",
@@ -53,7 +53,7 @@ func TestDateRuleSelectors(t *testing.T) {
 				<meta property="article:published_time" content="2022-01-01T15:04:05Z"/>
 				<time datetime="2022-10-11T15:04:05Z"></time>	
 			`,
-			expected: []string{"2022-01-01T15:04:05Z"},
+			expected: "2022-01-01T15:04:05Z",
 		},
 		{
 			desc: "Test no value found",
@@ -62,7 +62,7 @@ func TestDateRuleSelectors(t *testing.T) {
 				<time foobar="2022-10-11T15:04:05Z"></time>
 				<div class="foo">2022-10-11</div>
 			`,
-			expected: []string{},
+			expected: "",
 			error:    rules.ErrValueNotFound,
 		},
 	}
@@ -86,7 +86,7 @@ func TestDateRuleSelectors(t *testing.T) {
 			if err != nil {
 				assert.Equal(t, tC.error, err, fmt.Sprintf("Want error %v, got %v", tC.error, err))
 			} else {
-				assert.Equal(t, tC.expected, result.Value, fmt.Sprintf("Want %s, got %s", tC.expected, result.Value))
+				assert.Equal(t, tC.expected, result.Value(), fmt.Sprintf("Want %s, got %s", tC.expected, result.Value()))
 			}
 		})
 	}

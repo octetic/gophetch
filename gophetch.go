@@ -47,7 +47,7 @@ func New(fetchers ...fetchers.HTMLFetcher) *Gophetch {
 	return g
 }
 
-// The ReadAndParse method accepts two parameters: an io.Reader containing the HTML to be parsed, and a
+// ReadAndParse accepts two parameters: an io.Reader containing the HTML to be parsed, and a
 // target URL string. It reads the HTML content from the provided io.Reader, parses it to extract metadata, and
 // encapsulates the extracted metadata, along with the response data, into a Result struct which is then returned.
 // This method is useful when the HTML content is already available and does not need to be fetched from the internet.
@@ -84,7 +84,7 @@ func (g *Gophetch) ReadAndParse(r io.Reader, targetURL string) (Result, error) {
 	return fetchedData, nil
 }
 
-// The FetchAndParse method accepts a target URL string as its parameter. It initiates an HTTP request to fetch
+// FetchAndParse accepts a target URL string as its parameter. It initiates an HTTP request to fetch
 // the HTML content from the specified URL, parses the fetched HTML to extract metadata, and encapsulates the
 // extracted metadata, along with the response data, into a Result struct which is then returned. This method is
 // useful when the HTML content needs to be fetched from the internet before parsing.
@@ -100,12 +100,12 @@ func (g *Gophetch) FetchAndParse(targetURL string) (Result, error) {
 	}
 
 	var data metadata.Metadata
-	hasData := false
+	hasMetadata := false
 	for _, fetcher := range g.Fetchers {
 		resp, body, err = fetcher.FetchHTML(targetURL)
 		if err == nil {
 			data = fetcher.Metadata()
-			hasData = fetcher.HasMetadata()
+			hasMetadata = fetcher.HasMetadata()
 			fetcherName = fetcher.Name()
 			break
 		}
@@ -138,8 +138,12 @@ func (g *Gophetch) FetchAndParse(targetURL string) (Result, error) {
 	}
 
 	// If the fetcher provided metadata, use that instead
-	if hasData {
+	if hasMetadata {
 		fetchedData.Metadata = data
+		result, err := g.Extractor.ExtractRuleByKey(g.Parser.Node(), g.Parser.URL(), "readable")
+		if err == nil {
+			result.ApplyMetadata("readable", g.Parser.URL(), &fetchedData.Metadata)
+		}
 		return fetchedData, nil
 	}
 
