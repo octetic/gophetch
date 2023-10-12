@@ -49,13 +49,13 @@ func isValidFaviconMIMEType(mimeType string) bool {
 	return ok
 }
 
-//func IsValidImage(url string) bool {
-//	valid, err := ValidateImage(url, false)
-//	if err != nil {
-//		return false
-//	}
-//	return valid
-//}
+func IsValidImage(url string) bool {
+	valid, err := ValidateImage(url, false)
+	if err != nil {
+		return false
+	}
+	return valid
+}
 
 // IsValidFavicon checks if the given URL is a valid favicon.
 func IsValidFavicon(url string) bool {
