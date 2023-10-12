@@ -47,14 +47,15 @@ func (cr *CanonicalRule) Extract(node *html.Node, targetURL *url.URL) (ExtractRe
 		}
 	}
 
-	sr, ok := result.(*StringResult)
-	if !ok {
-		return &NoResult{}, errors.New("invalid result type")
-	}
-
-	inMeta := sr.SelectorInfo().Selector == "content"
-
 	if result.Found() {
+
+		sr, ok := result.(*StringResult)
+		if !ok {
+			return NewNoResult(), errors.New("invalid result type")
+		}
+
+		inMeta := sr.SelectorInfo().Selector == "content"
+
 		// If the value is not a full URL, then prepend the scheme and host
 		if !strings.HasPrefix(sr.value, "http") {
 			sr.value = targetURL.Scheme + "://" + targetURL.Host + sr.value
