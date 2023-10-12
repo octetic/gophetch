@@ -28,6 +28,8 @@ github.com/pixiesys/gophetch v0.0.0-20231012100407-13b7b352e205 h1:gZhqxEgBXnijF
 github.com/pixiesys/gophetch v0.0.0-20231012100407-13b7b352e205/go.mod h1:zukYoeQ3lSNCVyRHyNeCh9WRxm8gubJMfB8wmAr26EA=
 github.com/pixiesys/gophetch v0.0.0-20231012101348-a54f840c545c h1:rbx7SG/T4+rPVT78aqiDV/r315UySLcHq+Bg/YwnKjs=
 github.com/pixiesys/gophetch v0.0.0-20231012101348-a54f840c545c/go.mod h1:zukYoeQ3lSNCVyRHyNeCh9WRxm8gubJMfB8wmAr26EA=
+github.com/pixiesys/gophetch v0.0.0-20231012103929-4517b2c5865f h1:cfVO8jRZVpbEqu2Sr4ogvoDwwIfDR00fH2UwhoEAoEM=
+github.com/pixiesys/gophetch v0.0.0-20231012103929-4517b2c5865f/go.mod h1:zukYoeQ3lSNCVyRHyNeCh9WRxm8gubJMfB8wmAr26EA=
 github.com/pmezard/go-difflib v1.0.0 h1:4DBwDE0NGyQoBHbLQYPwSUPoCMWR5BEzIk/f1lZbAQM=
 github.com/pmezard/go-difflib v1.0.0/go.mod h1:iKH77koFhYxTK1pcRnkKkqfTogsbg7gZNVY4sRDYZ/4=
 github.com/sergi/go-diff v1.1.0 h1:we8PVUC3FE2uYfodKH/nBHMSetSfHDR6scGdBi+erh0=
