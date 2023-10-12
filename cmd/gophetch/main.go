@@ -84,7 +84,7 @@ func main() {
 	htmlFetchers = append(htmlFetchers, standardFetcher)
 
 	g := gophetch.New(htmlFetchers...)
-	data, err := g.FetchAndExtractFromURL(cfg.URL)
+	data, err := g.FetchAndParse(cfg.URL)
 	if err != nil {
 		panic(err)
 	}

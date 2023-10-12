@@ -1,5 +1,12 @@
 package rules
 
+import (
+	"net/url"
+	"strings"
+
+	"golang.org/x/net/html"
+)
+
 // SiteNameRule is the rule for extracting the site name information from a page.
 type SiteNameRule struct {
 	BaseRule
@@ -25,4 +32,24 @@ var siteNameStrategies = []ExtractionStrategy{
 		},
 		Extractor: ExtractAttr("content"),
 	},
+}
+
+func (r *SiteNameRule) Extract(node *html.Node, targetURL *url.URL) (ExtractResult, error) {
+	result, err := r.BaseRule.Extract(node, targetURL)
+	if err == nil && result.Found() {
+		return result, nil
+	}
+
+	// If no site name was found, use the domain name without the TLD and 'www'
+	domain := targetURL.Hostname()
+	domain = strings.TrimPrefix(domain, "www.")
+	return NewStringResult(
+		domain,
+		SelectorInfo{
+			Attr:     "content",
+			InMeta:   false,
+			Selector: "domain",
+		},
+		true,
+	), nil
 }

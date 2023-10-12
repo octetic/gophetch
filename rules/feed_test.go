@@ -12,51 +12,37 @@ import (
 	"github.com/pixiesys/gophetch/rules"
 )
 
-func TestCanonicalRuleSelectors(t *testing.T) {
+func TestFeedRuleSelectors(t *testing.T) {
 	const targetURLStr = "https://example.com"
 
 	testCases := []struct {
 		desc     string
 		mockHTML string
-		expected string
+		expected []string
 		error    error
 	}{
 		{
-			desc:     "Test with og:url in meta",
-			mockHTML: `<meta property="og:url" content="https://example.com"/>`,
-			expected: "https://example.com",
+			desc:     "Test with atom in link",
+			mockHTML: `<link rel="alternate" type="application/atom+xml" href="https://example.com/atom.xml"/>`,
+			expected: []string{"https://example.com/atom.xml"},
 		},
 		{
-			desc:     "Test with name twitter:url in meta",
-			mockHTML: `<meta name="twitter:url" content="https://example.com"/>`,
-			expected: "https://example.com",
+			desc:     "Test with rss in link",
+			mockHTML: `<link rel="alternate" type="application/rss+xml" href="https://example.com/rss.xml"/>`,
+			expected: []string{"https://example.com/rss.xml"},
 		},
 		{
-			desc:     "Test with property twitter:url in meta",
-			mockHTML: `<meta property="twitter:url" content="https://example.com"/>`,
-			expected: "https://example.com",
+			desc:     "Test with multiple selectors, returning all feed URLs",
+			mockHTML: `<link rel="alternate" type="application/atom+xml" href="https://example.com/atom.xml"/><link rel="alternate" type="application/rss+xml" href="https://example.com/rss.xml"/>`,
+			expected: []string{"https://example.com/rss.xml", "https://example.com/atom.xml"},
 		},
 		{
-			desc:     "Test with rel canonical in link",
-			mockHTML: `<link rel="canonical" href="https://example.com"/>`,
-			expected: "https://example.com",
-		},
-		{
-			desc:     "Test with rel alternate hreflang x-default in link",
-			mockHTML: `<link rel="alternate" hreflang="x-default" href="https://example.com"/>`,
-			expected: "https://example.com",
-		},
-		{
-			desc:     "Test with multiple selectors, prioritizing og:url in meta",
-			mockHTML: `<meta property="og:url" content="https://example.com"/><link rel="canonical" href="https://example.net"/>`,
-			expected: "https://example.com",
-		},
-		{
-			desc: "Test with multiple selectors, prioritizing og:url in meta",
+			desc: "Test with multiple selectors, prioritizing icon in meta",
 			mockHTML: `
 		        <html>
 		        <head>	
-		        <meta property="og:url" content="https://example.com"/>
+				 <link rel="alternate" type="application/atom+xml" href="https://example.com/atom.xml"/>
+				 <link rel="alternate" type="application/rss+xml" href="https://example.com/rss.xml"/>
 		        <link rel="canonical" href="https://example.net"/>
 				</head>
 				<body>
@@ -67,7 +53,7 @@ func TestCanonicalRuleSelectors(t *testing.T) {
 				</body>
 				</html>
 			`,
-			expected: "https://example.com",
+			expected: []string{"https://example.com/rss.xml", "https://example.com/atom.xml"},
 		},
 		{
 			desc: "Test no value found",
@@ -75,12 +61,12 @@ func TestCanonicalRuleSelectors(t *testing.T) {
 				<span property="foo:bar">John Foo</span>
 				<span property="schema:foo">John Schema</span>
 			`,
-			expected: targetURLStr,
+			expected: []string{},
 			error:    rules.ErrValueNotFound,
 		},
 	}
 
-	cr := rules.NewCanonicalRule()
+	fr := rules.NewFeedRule()
 	targetURL, err := url.Parse(targetURLStr)
 	if err != nil {
 		t.Fatal(err)
@@ -95,7 +81,7 @@ func TestCanonicalRuleSelectors(t *testing.T) {
 			}
 
 			// Call the AuthorRule's Extract method
-			result, err := cr.Extract(mockNode, targetURL)
+			result, err := fr.Extract(mockNode, targetURL)
 			if err != nil {
 				assert.Equal(t, tC.error, err, fmt.Sprintf("Want error %v, got %v", tC.error, err))
 			} else {

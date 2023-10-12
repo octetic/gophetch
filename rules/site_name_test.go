@@ -12,8 +12,8 @@ import (
 	"github.com/pixiesys/gophetch/rules"
 )
 
-func TestCanonicalRuleSelectors(t *testing.T) {
-	const targetURLStr = "https://example.com"
+func TestSiteNameRuleSelectors(t *testing.T) {
+	const targetURLStr = "https://www.example.com"
 
 	testCases := []struct {
 		desc     string
@@ -22,41 +22,46 @@ func TestCanonicalRuleSelectors(t *testing.T) {
 		error    error
 	}{
 		{
-			desc:     "Test with og:url in meta",
-			mockHTML: `<meta property="og:url" content="https://example.com"/>`,
-			expected: "https://example.com",
+			desc:     "Test with og:site_name in meta",
+			mockHTML: `<meta property="og:site_name" content="Example"/>`,
+			expected: "Example",
 		},
 		{
-			desc:     "Test with name twitter:url in meta",
-			mockHTML: `<meta name="twitter:url" content="https://example.com"/>`,
-			expected: "https://example.com",
+			desc:     "Test with name og:site_name in meta",
+			mockHTML: `<meta name="og:site_name" content="Example"/>`,
+			expected: "Example",
 		},
 		{
-			desc:     "Test with property twitter:url in meta",
-			mockHTML: `<meta property="twitter:url" content="https://example.com"/>`,
-			expected: "https://example.com",
+			desc:     "Test with twitter:site_name in meta",
+			mockHTML: `<meta property="twitter:site_name" content="Example"/>`,
+			expected: "Example",
 		},
 		{
-			desc:     "Test with rel canonical in link",
-			mockHTML: `<link rel="canonical" href="https://example.com"/>`,
-			expected: "https://example.com",
+			desc:     "Test with name twitter:site_name in meta",
+			mockHTML: `<meta name="twitter:site_name" content="Example"/>`,
+			expected: "Example",
 		},
 		{
-			desc:     "Test with rel alternate hreflang x-default in link",
-			mockHTML: `<link rel="alternate" hreflang="x-default" href="https://example.com"/>`,
-			expected: "https://example.com",
+			desc:     "Test with itemprop name in meta",
+			mockHTML: `<meta itemprop="name" content="Example"/>`,
+			expected: "Example",
 		},
 		{
-			desc:     "Test with multiple selectors, prioritizing og:url in meta",
-			mockHTML: `<meta property="og:url" content="https://example.com"/><link rel="canonical" href="https://example.net"/>`,
-			expected: "https://example.com",
+			desc:     "Test with name application-name in meta",
+			mockHTML: `<meta name="application-name" content="Example"/>`,
+			expected: "Example",
 		},
 		{
-			desc: "Test with multiple selectors, prioritizing og:url in meta",
+			desc:     "Test with multiple selectors, prioritizing og:site_name in meta",
+			mockHTML: `<meta property="og:site_name" content="Example"/><meta name="twitter:site_name" content="Example2"/>`,
+			expected: "Example",
+		},
+		{
+			desc: "Test with multiple selectors, prioritizing og:site_name in meta",
 			mockHTML: `
 		        <html>
 		        <head>	
-		        <meta property="og:url" content="https://example.com"/>
+		        <meta property="og:site_name" content="Example"/>
 		        <link rel="canonical" href="https://example.net"/>
 				</head>
 				<body>
@@ -67,7 +72,7 @@ func TestCanonicalRuleSelectors(t *testing.T) {
 				</body>
 				</html>
 			`,
-			expected: "https://example.com",
+			expected: "Example",
 		},
 		{
 			desc: "Test no value found",
@@ -75,12 +80,12 @@ func TestCanonicalRuleSelectors(t *testing.T) {
 				<span property="foo:bar">John Foo</span>
 				<span property="schema:foo">John Schema</span>
 			`,
-			expected: targetURLStr,
+			expected: "example.com",
 			error:    rules.ErrValueNotFound,
 		},
 	}
 
-	cr := rules.NewCanonicalRule()
+	snr := rules.NewSiteNameRule()
 	targetURL, err := url.Parse(targetURLStr)
 	if err != nil {
 		t.Fatal(err)
@@ -95,7 +100,7 @@ func TestCanonicalRuleSelectors(t *testing.T) {
 			}
 
 			// Call the AuthorRule's Extract method
-			result, err := cr.Extract(mockNode, targetURL)
+			result, err := snr.Extract(mockNode, targetURL)
 			if err != nil {
 				assert.Equal(t, tC.error, err, fmt.Sprintf("Want error %v, got %v", tC.error, err))
 			} else {

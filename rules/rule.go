@@ -130,7 +130,7 @@ func (r *StringResult) ApplyMetadata(key string, u *url.URL, m *metadata.Metadat
 	case "title":
 		m.Title = Normalize(r.value)
 	default:
-		m.Dynamic[key] = r.Value
+		m.Dynamic[key] = r.value
 	}
 }
 
@@ -167,7 +167,7 @@ func (r *MultiStringResult) Found() bool {
 }
 
 func (r *MultiStringResult) Value() any {
-	return r.Value
+	return r.value
 }
 
 type ReadableValue struct {
