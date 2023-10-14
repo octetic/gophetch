@@ -3,7 +3,7 @@ module github.com/minsoft-io/gophetch/cmd
 go 1.21.1
 
 require (
-	github.com/minsoft-io/gophetch v0.0.0-20231014025839-5d87b659b1fb
+	github.com/minsoft-io/gophetch v0.0.0-20231014030435-ff0f106b095e
 	github.com/peterbourgon/ff/v3 v3.4.0
 )
 
@@ -20,8 +20,4 @@ require (
 	golang.org/x/image v0.13.0 // indirect
 	golang.org/x/net v0.17.0 // indirect
 	golang.org/x/text v0.13.0 // indirect
-)
-
-replace (
-	github.com/minsoft-io/gophetch => ../../
 )
