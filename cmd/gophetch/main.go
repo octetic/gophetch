@@ -8,9 +8,9 @@ import (
 
 	"github.com/peterbourgon/ff/v3"
 
-	"github.com/pixiesys/gophetch"
-	"github.com/pixiesys/gophetch/fetchers"
-	"github.com/pixiesys/gophetch/metadata"
+	"github.com/minsoft-io/gophetch"
+	"github.com/minsoft-io/gophetch/fetchers"
+	"github.com/minsoft-io/gophetch/metadata"
 )
 
 type config struct {

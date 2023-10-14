@@ -1,10 +1,10 @@
-module github.com/pixiesys/gophetch/cmd
+module github.com/minsoft-io/gophetch/cmd
 
 go 1.21.1
 
 require (
 	github.com/peterbourgon/ff/v3 v3.4.0
-	github.com/pixiesys/gophetch v0.0.0-20231012111703-d3c38841d02b
+	github.com/minsoft-io/gophetch v0.0.0-20231012111703-d3c38841d02b
 )
 
 require (
