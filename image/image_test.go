@@ -5,6 +5,7 @@ import (
 	"io"
 	"net/http"
 	"net/http/httptest"
+	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -84,7 +85,7 @@ func TestImageFromBytes(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run("", func(t *testing.T) {
-			img, err := image.ImageFromBytes(tt.data)
+			img, err := image.NewImageFromBytes(tt.data)
 			assert.NoError(t, err)
 			assert.Equal(t, tt.expected, img.Metadata)
 		})
@@ -177,21 +178,22 @@ func TestImageFromURL(t *testing.T) {
 			imgURL:      server.URL + "/invalid",
 			expectedErr: "image: unknown format",
 		},
-		{
-			name:   "Wikipedia Image",
-			imgURL: "http://upload.wikimedia.org/wikipedia/commons/9/9a/SKA_dishes_big.jpg",
-			expected: image.Metadata{
-				Width:       5000,
-				Height:      2813,
-				ContentSize: 10001439,
-				ContentType: "image/jpeg",
-			},
-		},
+		// Uncomment this test to test against a large, remote image
+		//{
+		//	name:   "Wikipedia Image",
+		//	imgURL: "http://upload.wikimedia.org/wikipedia/commons/9/9a/SKA_dishes_big.jpg",
+		//	expected: image.Metadata{
+		//		Width:       5000,
+		//		Height:      2813,
+		//		ContentSize: 10001439,
+		//		ContentType: "image/jpeg",
+		//	},
+		//},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			img, err := image.ImageFromURL(tt.imgURL)
+			img, err := image.NewImageFromURL(tt.imgURL)
 			if tt.expectedErr != "" {
 				assert.EqualError(t, err, tt.expectedErr)
 			} else {
@@ -203,4 +205,81 @@ func TestImageFromURL(t *testing.T) {
 			}
 		})
 	}
+}
+
+func TestGenerateUniqueFilename(t *testing.T) {
+	testCases := []struct {
+		name      string
+		image     image.Image
+		nonEmpty  bool // Whether the returned filename should be non-empty
+		hasSuffix bool // Whether the filename should have the provided extension as suffix
+		suffix    string
+	}{
+		{
+			name:      "With URL and extension",
+			image:     image.Image{URL: "https://example.com/image.jpg", Extension: "jpg"},
+			nonEmpty:  true,
+			hasSuffix: true,
+			suffix:    ".jpg",
+		},
+		{
+			name:      "With URL but no extension",
+			image:     image.Image{URL: "https://example.com/image", Extension: ""},
+			nonEmpty:  true,
+			hasSuffix: false,
+			suffix:    "",
+		},
+		{
+			name:      "Without URL but with extension",
+			image:     image.Image{URL: "", Extension: "jpg"},
+			nonEmpty:  true,
+			hasSuffix: true,
+			suffix:    ".jpg",
+		},
+		{
+			name:      "Without URL and extension",
+			image:     image.Image{URL: "", Extension: ""},
+			nonEmpty:  true,
+			hasSuffix: false,
+			suffix:    "",
+		},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			filename := tc.image.GenerateUniqueFilename()
+
+			assert.NotEmpty(t, filename, "The filename should not be empty")
+
+			if tc.hasSuffix {
+				assert.True(t, strings.HasSuffix(filename, tc.suffix), "The filename should have the correct suffix")
+				// Remove suffix for further tests
+				filename = strings.TrimSuffix(filename, tc.suffix)
+			} else {
+				assert.False(t, strings.HasSuffix(filename, "."), "The filename should not have a period as the last character")
+			}
+
+			// Test the length of the filename based on whether URL is empty
+			if tc.image.URL == "" {
+				assert.Equal(t, 32, len(filename), "Random hash should be 32 characters long") // 16 bytes encoded as hex
+			} else {
+				assert.Equal(t, 40, len(filename), "SHA-1 hash should be 40 characters long")
+			}
+
+			// Test that filename only contains valid characters (0-9, a-f for hash)
+			assert.Regexp(t, "^[a-f0-9]+$", filename, "The filename should only contain valid characters")
+		})
+	}
+
+	// Test for randomness (uniqueness) by generating multiple filenames for an empty URL
+	t.Run("Randomness", func(t *testing.T) {
+		filenames := make(map[string]bool)
+		for i := 0; i < 1000; i++ {
+			img := &image.Image{URL: "", Extension: ""}
+			filename := img.GenerateUniqueFilename()
+			_, exists := filenames[filename]
+			assert.False(t, exists, "Filename should be unique")
+			filenames[filename] = true
+		}
+	})
 }

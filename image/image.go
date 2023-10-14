@@ -2,6 +2,10 @@ package image
 
 import (
 	"bytes"
+	"crypto/rand"
+	"crypto/sha1"
+	"encoding/hex"
+	"fmt"
 	"image"
 	"io"
 	"net/http"
@@ -15,6 +19,8 @@ type Image struct {
 	ContentSize int64
 	Format      string
 	Image       image.Image
+	URL         string
+	Extension   string
 }
 
 // ShouldCacheImage takes a http.Header and returns whether the image should be cached
@@ -80,9 +86,38 @@ func (i *Image) ShouldRefreshImage() bool {
 	return true
 }
 
-// ImageFromBytes returns the image and metadata from the given bytes. It will attempt to get the ContentType, Width,
+// GenerateUniqueFilename generates a unique filename based on the Image properties
+func (i *Image) GenerateUniqueFilename() string {
+	var hashString string
+
+	// If URL is empty, generate a random hash
+	if i.URL == "" {
+		randomData := make([]byte, 16) // using 16 bytes for the random part
+		_, err := rand.Read(randomData)
+		if err != nil {
+			// handle error
+			return ""
+		}
+		hashString = hex.EncodeToString(randomData)
+	} else {
+		// Hash the URL using SHA-1
+		h := sha1.New()
+		h.Write([]byte(i.URL))
+		hashed := h.Sum(nil)
+		hashString = fmt.Sprintf("%x", hashed)
+	}
+
+	// Append extension if available
+	if i.Extension != "" {
+		return fmt.Sprintf("%s.%s", hashString, i.Extension)
+	}
+
+	return hashString
+}
+
+// NewImageFromBytes returns the image and metadata from the given bytes. It will attempt to get the ContentType, Width,
 // Height, Format, and ContentSize from the given bytes. If the metadata cannot be extracted, an error is returned.
-func ImageFromBytes(data []byte) (*Image, error) {
+func NewImageFromBytes(data []byte) (*Image, error) {
 	img, format, err := image.Decode(bytes.NewReader(data))
 	if err != nil {
 		return nil, err
@@ -91,6 +126,10 @@ func ImageFromBytes(data []byte) (*Image, error) {
 	bounds := img.Bounds()
 	width, height := bounds.Max.X, bounds.Max.Y
 	contentType := http.DetectContentType(data)
+	extension, err := ExtensionByContentType(contentType)
+	if err != nil {
+		extension = ""
+	}
 
 	return &Image{
 		Bytes:       data,
@@ -101,14 +140,15 @@ func ImageFromBytes(data []byte) (*Image, error) {
 			ContentSize: int64(len(data)),
 			ContentType: contentType,
 		},
-		Format: format,
-		Image:  img,
+		Format:    format,
+		Image:     img,
+		Extension: extension,
 	}, nil
 }
 
-// ImageFromURL will download the image from the given URL and return the image and metadata. It will attempt to get the
+// NewImageFromURL will download the image from the given URL and return the image and metadata. It will attempt to get the
 // ContentType, Width, Height, Format, and ContentSize from the downloaded bytes as well.
-func ImageFromURL(imgURL string) (*Image, error) {
+func NewImageFromURL(imgURL string) (*Image, error) {
 	resp, err := http.Get(imgURL)
 	if err != nil {
 		return nil, err
@@ -122,11 +162,12 @@ func ImageFromURL(imgURL string) (*Image, error) {
 		return nil, err
 	}
 
-	img, err := ImageFromBytes(imgData)
+	img, err := NewImageFromBytes(imgData)
 	if err != nil {
 		return nil, err
 	}
 
 	img.Cache = ParseCacheHeader(resp.Header)
+	img.URL = imgURL
 	return img, nil
 }

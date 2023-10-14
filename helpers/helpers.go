@@ -24,6 +24,21 @@ func Normalize(input string) string {
 	return normalized
 }
 
+// CreateUniqueFilename creates a unique filename for the given URL.
+func CreateUniqueFilename(url *url.URL) string {
+	var buf strings.Builder
+
+	if url.Host != "" {
+		buf.WriteString(url.Host)
+	}
+
+	if url.Path != "" {
+		buf.WriteString(url.Path)
+	}
+
+	return buf.String()
+}
+
 // FixRelativePath converts a relative path to an absolute path for the given URL.
 func FixRelativePath(url *url.URL, path string) string {
 	path = strings.TrimSpace(path)

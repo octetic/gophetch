@@ -53,7 +53,7 @@ func FetchMetadataFromHeader(imgURL string, maxBytes int) (Metadata, error) {
 		imgData = append(imgData, buf[:n]...)
 		totalRead += n
 
-		img, err := ImageFromBytes(imgData)
+		img, err := NewImageFromBytes(imgData)
 
 		if err == nil {
 			//fmt.Printf("Found in first %d bytes\n", totalRead)
