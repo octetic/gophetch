@@ -23,7 +23,7 @@ func TestParseCacheHeader(t *testing.T) {
 			},
 			expected: image.Cache{
 				Available:      true,
-				MaxAge:         0,
+				MaxAge:         -1,
 				NoCache:        true,
 				NoStore:        false,
 				MustRevalidate: false,
@@ -36,7 +36,7 @@ func TestParseCacheHeader(t *testing.T) {
 			},
 			expected: image.Cache{
 				Available:      true,
-				MaxAge:         0,
+				MaxAge:         -1,
 				NoCache:        false,
 				NoStore:        true,
 				MustRevalidate: false,
@@ -49,7 +49,7 @@ func TestParseCacheHeader(t *testing.T) {
 			},
 			expected: image.Cache{
 				Available:      true,
-				MaxAge:         0,
+				MaxAge:         -1,
 				NoCache:        false,
 				NoStore:        false,
 				MustRevalidate: true,
@@ -62,7 +62,7 @@ func TestParseCacheHeader(t *testing.T) {
 			},
 			expected: image.Cache{
 				Available:      true,
-				MaxAge:         0,
+				MaxAge:         -1,
 				NoCache:        true,
 				NoStore:        true,
 				MustRevalidate: false,
@@ -75,7 +75,7 @@ func TestParseCacheHeader(t *testing.T) {
 			},
 			expected: image.Cache{
 				Available:      true,
-				MaxAge:         0,
+				MaxAge:         -1,
 				NoCache:        true,
 				NoStore:        false,
 				MustRevalidate: true,

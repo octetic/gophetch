@@ -31,43 +31,46 @@ func ParseCacheHeader(header http.Header) Cache {
 }
 
 func parseCacheControlHeader(header http.Header) (Cache, bool) {
-	ccHeader := header.Get("Cache-Control")
-	if ccHeader == "" {
-		return Cache{
-			Available:      false,
-			MaxAge:         -1,
-			Expires:        time.Time{},
-			NoCache:        false,
-			NoStore:        false,
-			MustRevalidate: false,
-		}, false
+	ccInfo := Cache{
+		Available:      false,
+		MaxAge:         -1,
+		Expires:        time.Time{},
+		NoCache:        false,
+		NoStore:        false,
+		MustRevalidate: false,
 	}
 
-	cache := Cache{}
+	// Extract Cache-Control header
+	cacheControl := header.Get("Cache-Control")
+	if cacheControl == "" {
+		return ccInfo, false
+	}
 
-	directives := strings.Split(ccHeader, ",")
-	for _, directive := range directives {
-		directive = strings.TrimSpace(directive)
-
-		switch {
-		case strings.HasPrefix(directive, "max-age"):
-			value := strings.TrimPrefix(directive, "max-age=")
-			age, err := strconv.Atoi(value)
-			if err == nil {
-				cache.MaxAge = age
-				cache.Expires = time.Now().Add(time.Duration(age) * time.Second)
-			}
-		case directive == "no-cache":
-			cache.NoCache = true
-		case directive == "no-store":
-			cache.NoStore = true
-		case directive == "must-revalidate":
-			cache.MustRevalidate = true
+	for _, directive := range strings.Split(cacheControl, ",") {
+		parts := strings.SplitN(strings.TrimSpace(directive), "=", 2)
+		switch parts[0] {
+		case "max-age":
+			ccInfo.MaxAge = parseMaxAge(parts[1])
+		case "no-cache":
+			ccInfo.NoCache = true
+		case "no-store":
+			ccInfo.NoStore = true
+		case "must-revalidate":
+			ccInfo.MustRevalidate = true
 		}
 	}
 
-	cache.Available = true
-	return cache, true
+	ccInfo.Available = true
+	return ccInfo, true
+}
+
+// parseMaxAge parses the Max-Age directive from Cache-Control header.
+func parseMaxAge(value string) int {
+	maxAge, err := strconv.Atoi(value)
+	if err != nil {
+		return -1
+	}
+	return maxAge
 }
 
 // parseExpiresHeader takes an http.Header and returns the parsed Expires time
