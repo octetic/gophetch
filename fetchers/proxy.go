@@ -5,7 +5,7 @@ import (
 	"net/http"
 	"net/url"
 
-	"github.com/pixiesys/gophetch/metadata"
+	"github.com/minsoft-io/gophetch/metadata"
 )
 
 // ProxyHTTPFetcher is a fetcher that uses a proxy to fetch HTML from a URL. It does not return metadata.

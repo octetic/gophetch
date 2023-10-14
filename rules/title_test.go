@@ -8,9 +8,8 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"golang.org/x/net/html"
-	// import your own packages here
 
-	"github.com/pixiesys/gophetch/rules"
+	"github.com/minsoft-io/gophetch/rules"
 )
 
 func TestTitleRuleSelectors(t *testing.T) {

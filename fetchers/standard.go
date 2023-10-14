@@ -5,7 +5,7 @@ import (
 	"io"
 	"net/http"
 
-	"github.com/pixiesys/gophetch/metadata"
+	"github.com/minsoft-io/gophetch/metadata"
 )
 
 // StandardHTTPFetcher is the struct that encapsulates the standard HTTP fetcher using the standard library.

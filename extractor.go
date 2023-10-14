@@ -7,9 +7,9 @@ import (
 
 	"golang.org/x/net/html"
 
-	"github.com/pixiesys/gophetch/metadata"
-	"github.com/pixiesys/gophetch/rules"
-	"github.com/pixiesys/gophetch/sites"
+	"github.com/minsoft-io/gophetch/metadata"
+	"github.com/minsoft-io/gophetch/rules"
+	"github.com/minsoft-io/gophetch/sites"
 )
 
 // Extractor is the struct that encapsulates the rules used to extract metadata from HTML.

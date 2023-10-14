@@ -9,7 +9,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"golang.org/x/net/html"
 
-	"github.com/pixiesys/gophetch/rules"
+	"github.com/minsoft-io/gophetch/rules"
 )
 
 func TestFaviconRuleSelectors(t *testing.T) {

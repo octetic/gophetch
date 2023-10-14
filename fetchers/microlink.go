@@ -8,7 +8,7 @@ import (
 	"net/url"
 	"strings"
 
-	"github.com/pixiesys/gophetch/metadata"
+	"github.com/minsoft-io/gophetch/metadata"
 )
 
 const endpoint = "https://pro.microlink.io/"

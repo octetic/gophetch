@@ -10,9 +10,9 @@ import (
 
 	"golang.org/x/net/html"
 
-	"github.com/pixiesys/gophetch/fetchers"
-	"github.com/pixiesys/gophetch/metadata"
-	"github.com/pixiesys/gophetch/sites"
+	"github.com/minsoft-io/gophetch/fetchers"
+	"github.com/minsoft-io/gophetch/metadata"
+	"github.com/minsoft-io/gophetch/sites"
 )
 
 // Gophetch is the main struct that encapsulates the parser, extractor, and fetchers.

@@ -5,6 +5,8 @@ import (
 	"net/url"
 
 	"golang.org/x/net/html"
+
+	"github.com/minsoft-io/gophetch/image"
 )
 
 // FaviconRule is the rule for extracting the favicon URL of a page.
@@ -41,7 +43,7 @@ func (r *FaviconRule) Extract(node *html.Node, targetURL *url.URL) (ExtractResul
 
 	// If no favicon was found, try to extract it from the /favicon.ico file.
 	faviconURL := fmt.Sprintf("%s://%s/favicon.ico", targetURL.Scheme, targetURL.Host)
-	if IsValidFavicon(faviconURL) {
+	if image.IsValidFavicon(faviconURL) {
 		return NewStringResult(
 			faviconURL,
 			SelectorInfo{

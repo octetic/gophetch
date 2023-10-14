@@ -54,7 +54,11 @@ test:
 build:
 	@(cd cmd/gophetch && go get -u && go mod verify && go build -v -ldflags='-s' -o=${PROJECT_ROOT}/bin/gophetch)
 
-## serve-docs: serve the docs on localhost:6060
+# ==================================================================================== #
+# Generation
+# ==================================================================================== #
+
+## serve-docs: serve the godoc documentation on localhost:6060
 .PHONY: serve-docs
 serve-docs:
-	godoc -http=:6060
+	@godoc -http=:6060

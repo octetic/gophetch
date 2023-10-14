@@ -6,7 +6,7 @@ import (
 	"net/http"
 	"net/url"
 
-	"github.com/pixiesys/gophetch/metadata"
+	"github.com/minsoft-io/gophetch/metadata"
 )
 
 // ScrapingfishFetcher is the struct that encapsulates the scrapingfish.com fetcher. It is responsible for fetching the
