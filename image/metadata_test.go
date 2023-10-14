@@ -19,7 +19,7 @@ func TestFetchMetadataFromURL(t *testing.T) {
 			return
 		}
 
-		reader := bytes.NewReader(imgData["test_image.png"])
+		reader := bytes.NewReader(imgData["mark.png"])
 		_, err := io.Copy(w, reader)
 		assert.NoError(t, err)
 	}))
@@ -37,7 +37,7 @@ func TestFetchMetadataFromURL(t *testing.T) {
 			expected: image.Metadata{
 				Width:       50,
 				Height:      50,
-				ContentSize: int64(len(imgData["test_image.png"])),
+				ContentSize: int64(len(imgData["mark.png"])),
 				ContentType: "image/png",
 			},
 		},

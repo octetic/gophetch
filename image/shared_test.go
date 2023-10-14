@@ -7,19 +7,19 @@ import (
 
 var (
 	imgData = map[string][]byte{
-		"test_image.bmp":  {},
-		"test_image.gif":  {},
-		"test_image.jpeg": {},
-		"test_image.png":  {},
-		"test_image.tiff": {},
-		"test_image.webp": {},
-		"test_image.ico":  {},
+		"mark.bmp":  {},
+		"mark.gif":  {},
+		"mark.jpg":  {},
+		"mark.png":  {},
+		"mark.tif":  {},
+		"mark.webp": {},
+		"mark.ico":  {},
 	}
 )
 
 func loadImageData() error {
 	for k := range imgData {
-		data, err := os.ReadFile("testdata/" + k)
+		data, err := os.ReadFile("../testdata/" + k)
 		if err != nil {
 			return err
 		}

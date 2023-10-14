@@ -15,7 +15,7 @@ var contentTypeToExt = map[string][]string{
 	"image/jpeg":               {".jpg", ".jpeg"},
 	"image/png":                {".png"},
 	"image/svg+xml":            {".svg"},
-	"image/tiff":               {".tiff"},
+	"image/tiff":               {".tif", ".tiff"},
 	"image/vnd.microsoft.icon": {".ico"},
 	"image/webp":               {".webp"},
 	"image/x-icon":             {".ico"},

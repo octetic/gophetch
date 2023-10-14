@@ -19,7 +19,7 @@ func TestIsValidImage(t *testing.T) {
 			return
 		}
 
-		reader := bytes.NewReader(imgData["test_image.png"])
+		reader := bytes.NewReader(imgData["mark.png"])
 		_, err := io.Copy(w, reader)
 		assert.NoError(t, err)
 	}))
@@ -59,13 +59,13 @@ func TestIsValidImage(t *testing.T) {
 func TestIsValidFavicon(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if r.URL.Path == "/invalid" {
-			reader := bytes.NewReader(imgData["test_image.tiff"])
+			reader := bytes.NewReader(imgData["mark.tif"])
 			_, err := io.Copy(w, reader)
 			assert.NoError(t, err)
 			return
 		}
 
-		reader := bytes.NewReader(imgData["test_image.ico"])
+		reader := bytes.NewReader(imgData["mark.ico"])
 		_, err := io.Copy(w, reader)
 		assert.NoError(t, err)
 	}))

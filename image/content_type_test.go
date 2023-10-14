@@ -70,7 +70,7 @@ func TestContentTypeFunctions(t *testing.T) {
 		{
 			name:           "TIFF Test",
 			contentType:    "image/tiff",
-			extension:      ".tiff",
+			extension:      ".tif",
 			isValidImage:   true,
 			isValidFavicon: false,
 		},
@@ -126,7 +126,7 @@ func TestContentTypeFromURL(t *testing.T) {
 			return
 		}
 
-		reader := bytes.NewReader(imgData["test_image.png"])
+		reader := bytes.NewReader(imgData["mark.png"])
 		_, err := io.Copy(w, reader)
 		assert.NoError(t, err)
 	}))

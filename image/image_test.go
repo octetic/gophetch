@@ -15,69 +15,77 @@ import (
 
 func TestImageFromBytes(t *testing.T) {
 	tests := []struct {
+		name     string
 		data     []byte
 		expected image.Metadata
 	}{
 		{
-			data: imgData["test_image.bmp"],
+			name: "valid bmp image",
+			data: imgData["mark.bmp"],
 			expected: image.Metadata{
-				Width:       50,
-				Height:      50,
-				ContentSize: int64(len(imgData["test_image.bmp"])),
+				Width:       100,
+				Height:      100,
+				ContentSize: int64(len(imgData["mark.bmp"])),
 				ContentType: "image/bmp",
 			},
 		},
 		{
-			data: imgData["test_image.gif"],
+			name: "valid gif image",
+			data: imgData["mark.gif"],
 			expected: image.Metadata{
-				Width:       50,
-				Height:      50,
-				ContentSize: int64(len(imgData["test_image.gif"])),
+				Width:       100,
+				Height:      100,
+				ContentSize: int64(len(imgData["mark.gif"])),
 				ContentType: "image/gif",
 			},
 		},
 		{
-			data: imgData["test_image.jpeg"],
+			name: "valid jpg image",
+			data: imgData["mark.jpg"],
 			expected: image.Metadata{
-				Width:       50,
-				Height:      50,
-				ContentSize: int64(len(imgData["test_image.jpeg"])),
+				Width:       100,
+				Height:      100,
+				ContentSize: int64(len(imgData["mark.jpg"])),
 				ContentType: "image/jpeg",
 			},
 		},
 		{
-			data: imgData["test_image.png"],
+			name: "valid png image",
+			data: imgData["mark.png"],
 			expected: image.Metadata{
-				Width:       50,
-				Height:      50,
-				ContentSize: int64(len(imgData["test_image.png"])),
+				Width:       100,
+				Height:      100,
+				ContentSize: int64(len(imgData["mark.png"])),
 				ContentType: "image/png",
 			},
 		},
 		{
-			data: imgData["test_image.tiff"],
+			name: "valid tiff image",
+			data: imgData["mark.tif"],
 			expected: image.Metadata{
-				Width:       50,
-				Height:      50,
-				ContentSize: int64(len(imgData["test_image.tiff"])),
+				Width:       100,
+				Height:      100,
+				ContentSize: int64(len(imgData["mark.tif"])),
 				ContentType: "application/octet-stream",
 			},
 		},
 		{
-			data: imgData["test_image.webp"],
+			name: "valid webp image",
+			data: imgData["mark.webp"],
 			expected: image.Metadata{
-				Width:       50,
-				Height:      50,
-				ContentSize: int64(len(imgData["test_image.webp"])),
+				Width:       100,
+				Height:      100,
+				ContentSize: int64(len(imgData["mark.webp"])),
 				ContentType: "image/webp",
 			},
 		},
 		{
-			data: imgData["test_image.ico"],
+			name: "valid favicon",
+			data: imgData["mark.ico"],
 			expected: image.Metadata{
 				Width:       48,
 				Height:      48,
-				ContentSize: int64(len(imgData["test_image.ico"])),
+				ContentSize: int64(len(imgData["mark.ico"])),
 				ContentType: "image/x-icon",
 			},
 		},
@@ -86,8 +94,8 @@ func TestImageFromBytes(t *testing.T) {
 	for _, tt := range tests {
 		t.Run("", func(t *testing.T) {
 			img, err := image.NewImageFromBytes(tt.data)
-			assert.NoError(t, err)
-			assert.Equal(t, tt.expected, img.Metadata)
+			assert.NoError(t, err, tt.name+" error mismatch")
+			assert.Equal(t, tt.expected, img.Metadata, tt.name+" metadata mismatch")
 		})
 	}
 }
@@ -100,27 +108,27 @@ func TestImageFromURL(t *testing.T) {
 		}
 
 		if r.URL.Path == "/favicon.ico" {
-			reader := bytes.NewReader(imgData["test_image.ico"])
+			reader := bytes.NewReader(imgData["mark.ico"])
 			_, err := io.Copy(w, reader)
 			assert.NoError(t, err)
 			return
 		}
 
 		if r.URL.Path == "/image.webb" {
-			reader := bytes.NewReader(imgData["test_image.webp"])
+			reader := bytes.NewReader(imgData["mark.webp"])
 			_, err := io.Copy(w, reader)
 			assert.NoError(t, err)
 			return
 		}
 
 		if r.URL.Path == "/image.jpg" {
-			reader := bytes.NewReader(imgData["test_image.jpeg"])
+			reader := bytes.NewReader(imgData["mark.jpg"])
 			_, err := io.Copy(w, reader)
 			assert.NoError(t, err)
 			return
 		}
 
-		reader := bytes.NewReader(imgData["test_image.png"])
+		reader := bytes.NewReader(imgData["mark.png"])
 		_, err := io.Copy(w, reader)
 		assert.NoError(t, err)
 	}))
@@ -137,9 +145,9 @@ func TestImageFromURL(t *testing.T) {
 			name:   "valid png image",
 			imgURL: server.URL,
 			expected: image.Metadata{
-				Width:       50,
-				Height:      50,
-				ContentSize: int64(len(imgData["test_image.png"])),
+				Width:       100,
+				Height:      100,
+				ContentSize: int64(len(imgData["mark.png"])),
 				ContentType: "image/png",
 			},
 		},
@@ -147,9 +155,9 @@ func TestImageFromURL(t *testing.T) {
 			name:   "valid jpeg image",
 			imgURL: server.URL + "/image.jpg",
 			expected: image.Metadata{
-				Width:       50,
-				Height:      50,
-				ContentSize: int64(len(imgData["test_image.jpeg"])),
+				Width:       100,
+				Height:      100,
+				ContentSize: int64(len(imgData["mark.jpg"])),
 				ContentType: "image/jpeg",
 			},
 		},
@@ -157,9 +165,9 @@ func TestImageFromURL(t *testing.T) {
 			name:   "valid webp image",
 			imgURL: server.URL + "/image.webb",
 			expected: image.Metadata{
-				Width:       50,
-				Height:      50,
-				ContentSize: int64(len(imgData["test_image.webp"])),
+				Width:       100,
+				Height:      100,
+				ContentSize: int64(len(imgData["mark.webp"])),
 				ContentType: "image/webp",
 			},
 		},
@@ -169,7 +177,7 @@ func TestImageFromURL(t *testing.T) {
 			expected: image.Metadata{
 				Width:       48,
 				Height:      48,
-				ContentSize: int64(len(imgData["test_image.ico"])),
+				ContentSize: int64(len(imgData["mark.ico"])),
 				ContentType: "image/x-icon",
 			},
 		},
@@ -252,22 +260,22 @@ func TestGenerateUniqueFilename(t *testing.T) {
 			assert.NotEmpty(t, filename, "The filename should not be empty")
 
 			if tc.hasSuffix {
-				assert.True(t, strings.HasSuffix(filename, tc.suffix), "The filename should have the correct suffix")
+				assert.True(t, strings.HasSuffix(filename, tc.suffix), tc.name+"The filename should have the correct suffix")
 				// Remove suffix for further tests
 				filename = strings.TrimSuffix(filename, tc.suffix)
 			} else {
-				assert.False(t, strings.HasSuffix(filename, "."), "The filename should not have a period as the last character")
+				assert.False(t, strings.HasSuffix(filename, "."), tc.name+"The filename should not have a period as the last character")
 			}
 
 			// Test the length of the filename based on whether URL is empty
 			if tc.image.URL == "" {
-				assert.Equal(t, 32, len(filename), "Random hash should be 32 characters long") // 16 bytes encoded as hex
+				assert.Equal(t, 32, len(filename), tc.name+"Random hash should be 32 characters long") // 16 bytes encoded as hex
 			} else {
-				assert.Equal(t, 40, len(filename), "SHA-1 hash should be 40 characters long")
+				assert.Equal(t, 40, len(filename), tc.name+"SHA-1 hash should be 40 characters long")
 			}
 
 			// Test that filename only contains valid characters (0-9, a-f for hash)
-			assert.Regexp(t, "^[a-f0-9]+$", filename, "The filename should only contain valid characters")
+			assert.Regexp(t, "^[a-f0-9]+$", filename, tc.name+"The filename should only contain valid characters")
 		})
 	}
 
