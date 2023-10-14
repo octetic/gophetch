@@ -13,7 +13,8 @@ help:
 	@sed -n 's/^##//p' ${MAKEFILE_LIST} | column -t -s ':' |  sed -e 's/^/ /'
 
 # ==================================================================================== #
-# QUALITY CONTROL
+## :
+## QUALITY CONTROL:
 # ==================================================================================== #
 
 ## tidy: format code and tidy modfile
@@ -46,7 +47,8 @@ test:
 	fi
 
 # ==================================================================================== #
-# BUILD
+## :
+## BUILD:
 # ==================================================================================== #
 
 ## build: build the cmd/web application
@@ -54,10 +56,14 @@ test:
 build:
 	@(cd cmd/gophetch && go get -u && go mod verify && go build -v -ldflags='-s' -o=${PROJECT_ROOT}/bin/gophetch)
 
+# ==================================================================================== #
+## :
+## VERSIONING:
+# ==================================================================================== #
+
 ## tag: create a new git tag version
 .PHONY: tag
 # Makefile command for version tagging with prompt
-# Makefile command for version tagging with prompt and optional 'v' prefix
 tag:
 	@if [ -z "$$version" ]; then \
 		echo "Error: version is not set. Use 'make tag version=x.y.z message=\"Some message\"'"; \
@@ -84,7 +90,8 @@ tag:
 	esac
 
 # ==================================================================================== #
-# Generation
+## :
+## GENERATORS:
 # ==================================================================================== #
 
 ## serve-docs: serve the godoc documentation on localhost:6060
