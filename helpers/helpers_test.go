@@ -1,4 +1,4 @@
-package rules_test
+package helpers_test
 
 import (
 	"net/url"
@@ -6,7 +6,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
-	"github.com/minsoft-io/gophetch/rules"
+	"github.com/minsoft-io/gophetch/helpers"
 )
 
 func TestFixRelativePath(t *testing.T) {
@@ -68,7 +68,7 @@ func TestFixRelativePath(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			actual := rules.FixRelativePath(tc.url, tc.path)
+			actual := helpers.FixRelativePath(tc.url, tc.path)
 			assert.Equal(t, tc.expected, actual)
 		})
 	}

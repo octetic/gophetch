@@ -6,6 +6,7 @@ import (
 
 	"golang.org/x/net/html"
 
+	"github.com/minsoft-io/gophetch/helpers"
 	"github.com/minsoft-io/gophetch/metadata"
 )
 
@@ -107,28 +108,28 @@ func NewStringResult(value string, selectorInfo SelectorInfo, found bool) *Strin
 func (r *StringResult) ApplyMetadata(key string, u *url.URL, m *metadata.Metadata) {
 	switch key {
 	case "author":
-		m.Author = Normalize(r.value)
+		m.Author = helpers.Normalize(r.value)
 	case "canonical":
-		canonicalURL := FixRelativePath(u, r.value)
+		canonicalURL := helpers.FixRelativePath(u, r.value)
 		m.CanonicalURL = canonicalURL
 		m.URL = canonicalURL
 	case "date":
-		m.Date = Normalize(r.value)
+		m.Date = helpers.Normalize(r.value)
 	case "description":
-		m.Description = Normalize(r.value)
+		m.Description = helpers.Normalize(r.value)
 	case "favicon":
-		m.FaviconURL = FixRelativePath(u, r.value)
+		m.FaviconURL = helpers.FixRelativePath(u, r.value)
 	case "lang":
-		m.Lang = Normalize(r.value)
+		m.Lang = helpers.Normalize(r.value)
 	case "lead_image":
-		m.LeadImageURL = FixRelativePath(u, r.value)
+		m.LeadImageURL = helpers.FixRelativePath(u, r.value)
 		m.LeadImageInMeta = r.selectorInfo.InMeta
 	case "publisher":
-		m.Publisher = Normalize(r.value)
+		m.Publisher = helpers.Normalize(r.value)
 	case "site_name":
-		m.SiteName = Normalize(r.value)
+		m.SiteName = helpers.Normalize(r.value)
 	case "title":
-		m.Title = Normalize(r.value)
+		m.Title = helpers.Normalize(r.value)
 	default:
 		m.Dynamic[key] = r.value
 	}
