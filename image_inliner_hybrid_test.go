@@ -60,9 +60,9 @@ func TestHybridStrategy(t *testing.T) {
 			mockFetcher.On("NewImageFromURL", mock.Anything).Return(tt.mockFetchImage, tt.mockFetchError)
 
 			inliner := gophetch.NewImageInliner(gophetch.ImageInlinerOptions{
-				Fetcher:    mockFetcher,
-				UploadFunc: mockUploadFunc,
-				Strategy:   gophetch.StrategyHybrid,
+				Fetcher:        mockFetcher,
+				UploadFunc:     mockUploadFunc,
+				InlineStrategy: gophetch.InlineHybrid,
 			})
 			inliner.ShouldInline = func(img *image.Image) bool {
 				return tt.shouldInline

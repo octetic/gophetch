@@ -42,9 +42,9 @@ func TestUploadStrategy(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			inliner := gophetch.NewImageInliner(gophetch.ImageInlinerOptions{
-				Fetcher:    mockFetcher,
-				UploadFunc: mockUploadFunc,
-				Strategy:   gophetch.StrategyUpload,
+				Fetcher:        mockFetcher,
+				UploadFunc:     mockUploadFunc,
+				InlineStrategy: gophetch.InlineNone,
 			})
 
 			actualHTML, err := inliner.InlineImages(tt.inputHTML)

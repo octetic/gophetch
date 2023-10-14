@@ -13,16 +13,38 @@ import (
 	"github.com/minsoft-io/gophetch/image"
 )
 
-type InlineStrategy string
+// InlineStrategy represents the different strategies for inlining images.
+type InlineStrategy int
 
 const (
-	// StrategyInline stores images as base64 inline
-	StrategyInline InlineStrategy = "inline"
-	// StrategyHybrid stores images as base64 inline if they are less than maxContentSize or
-	// smaller than maxWidth x maxHeight, otherwise it uploads them to cloud storage
-	StrategyHybrid InlineStrategy = "hybrid"
-	// StrategyUpload stores images in cloud storage
-	StrategyUpload InlineStrategy = "upload"
+	// InlineAll indicates that all images should be inlined.
+	InlineAll InlineStrategy = iota
+
+	// InlineNone indicates that no images should be inlined, and all images should be uploaded to
+	// cloud storage using the upload function.
+	InlineNone
+
+	// InlineHybrid indicates a hybrid approach to inlining images where images are inlined if they are smaller
+	// than the maxContentSize, maxWidth, and maxHeight options, and uploaded to cloud storage otherwise.
+	InlineHybrid
+)
+
+// SrcsetStrategy represents the different strategies for handling srcset attributes.
+type SrcsetStrategy int
+
+const (
+	// SrcsetSmallestImage selects the smallest image in the srcset.
+	SrcsetSmallestImage SrcsetStrategy = iota
+
+	// SrcsetLargestImage selects the largest image in the srcset.
+	SrcsetLargestImage
+
+	// SrcsetPreferredDescriptors selects an image based on the preferred descriptors.
+	// Currently only looks for 2x, 1.5x, and 1x, in that order.
+	SrcsetPreferredDescriptors
+
+	// SrcsetAllImages includes all images in the srcset.
+	SrcsetAllImages
 )
 
 // ImageFetcher is an interface for fetching images
@@ -33,12 +55,15 @@ type ImageFetcher interface {
 // RealImageFetcher uses the actual implementation
 type RealImageFetcher struct{}
 
+// NewImageFromURL fetches an image from the given URL.
 func (r *RealImageFetcher) NewImageFromURL(url string) (*image.Image, error) {
 	return image.NewImageFromURL(url)
 }
 
+// UploadFunc is the function signature to use for uploading images to cloud storage.
 type UploadFunc func(*image.Image) (string, error)
 
+// ShouldInlineFunc is the function signature use for determining whether an image should be inlined.
 type ShouldInlineFunc func(*image.Image) bool
 
 // ImageInliner is responsible for fetching and replacing images in HTML documents.
@@ -46,7 +71,8 @@ type ImageInliner struct {
 	ShouldInline   ShouldInlineFunc
 	fetcher        ImageFetcher
 	uploadFunc     UploadFunc
-	strategy       InlineStrategy
+	inlineStrategy InlineStrategy
+	srcsetStrategy SrcsetStrategy
 	maxContentSize int64
 	maxWidth       int
 	maxHeight      int
@@ -62,8 +88,10 @@ type ImageInlinerOptions struct {
 	Fetcher ImageFetcher
 	// UploadFunc is the function to use for uploading images to cloud storage.
 	UploadFunc UploadFunc
-	// Strategy is the storage strategy to use.
-	Strategy InlineStrategy
+	// InlineStrategy is the storage strategy to use. Default is InlineAll.
+	InlineStrategy InlineStrategy
+	// SrcsetStrategy is the strategy to use for handling srcset attributes. Default is SrcsetSmallestImage.
+	SrcsetStrategy SrcsetStrategy
 	// MaxContentSize is the maximum size in bytes for images to be processed in a hybrid strategy. Default is 100KB.
 	MaxContentSize int64
 	// MaxWidth is the maximum width in pixels for images to be processed in a hybrid strategy. Default is 800.
@@ -105,12 +133,8 @@ func NewImageInliner(opts ImageInlinerOptions) *ImageInliner {
 			}
 			return opts.UploadFunc
 		}(),
-		strategy: func() InlineStrategy {
-			if opts.Strategy == "" {
-				return StrategyInline
-			}
-			return opts.Strategy
-		}(),
+		inlineStrategy: opts.InlineStrategy,
+		srcsetStrategy: opts.SrcsetStrategy,
 		maxContentSize: func() int64 {
 			if opts.MaxContentSize == 0 {
 				return 100 * 1024
@@ -153,14 +177,14 @@ func (inliner *ImageInliner) InlineImages(readableHTML string) (string, error) {
 				attr := &node.Attr[i]
 				if attr.Key == "src" || attr.Key == "srcset" || attr.Key == "poster" {
 					// Determine storage strategy based on file size, type, etc.
-					switch inliner.strategy {
-					case StrategyInline:
+					switch inliner.inlineStrategy {
+					case InlineAll:
 						// StrategyInline as base64
 						attr.Val = inliner.fetchAndInline(attr)
-					case StrategyUpload:
+					case InlineNone:
 						// Upload to cloud storage and replace URL
 						attr.Val = inliner.uploadAndReplaceAttr(attr)
-					case StrategyHybrid:
+					case InlineHybrid:
 						// Hybrid strategy
 						attr.Val = inliner.processHybrid(attr)
 					}
@@ -183,6 +207,10 @@ func (inliner *ImageInliner) InlineImages(readableHTML string) (string, error) {
 
 func (inliner *ImageInliner) fetchAndInline(attr *html.Attribute) string {
 	urls, descriptors := inliner.parseSrcAndSrcset(attr)
+	if attr.Key == "srcset" {
+		urls, descriptors = inliner.selectSrcsetURL(urls, descriptors)
+	}
+
 	var newURLs []string
 
 	for i, url := range urls {
@@ -204,6 +232,10 @@ func (inliner *ImageInliner) fetchAndInline(attr *html.Attribute) string {
 
 func (inliner *ImageInliner) processHybrid(attr *html.Attribute) string {
 	urls, descriptors := inliner.parseSrcAndSrcset(attr)
+	if attr.Key == "srcset" {
+		urls, descriptors = inliner.selectSrcsetURL(urls, descriptors)
+	}
+
 	var newURLs []string
 
 	for i, url := range urls {
@@ -235,6 +267,10 @@ func (inliner *ImageInliner) processHybrid(attr *html.Attribute) string {
 
 func (inliner *ImageInliner) uploadAndReplaceAttr(attr *html.Attribute) string {
 	urls, descriptors := inliner.parseSrcAndSrcset(attr)
+	if attr.Key == "srcset" {
+		urls, descriptors = inliner.selectSrcsetURL(urls, descriptors)
+	}
+
 	var newURLs []string
 
 	for i, url := range urls {
@@ -281,4 +317,58 @@ func (inliner *ImageInliner) parseSrcAndSrcset(attr *html.Attribute) ([]string, 
 	}
 
 	return urls, descriptors
+}
+
+// selectSrcsetURL selects URLs based on the chosen SrcsetStrategy.
+// It returns a slice of selected URLs and their corresponding descriptors.
+func (inliner *ImageInliner) selectSrcsetURL(urls []string, descriptors []string) ([]string, []string) {
+	var selectedURLs []string
+	var selectedDescriptors []string
+
+	preferredDescriptors := []string{"2x", "1.5x", "1x"} // Add more if needed
+
+	switch inliner.srcsetStrategy {
+	case SrcsetSmallestImage:
+		// Assuming the first descriptor usually points to the smallest image. This is not always true, but it's a
+		// reasonable assumption.
+		smallestIndex := 0
+		selectedURLs = append(selectedURLs, urls[smallestIndex])
+		selectedDescriptors = append(selectedDescriptors, descriptors[smallestIndex])
+
+	case SrcsetLargestImage:
+		// Assuming the last descriptor usually points to the largest image. This is not always true, but it's a
+		// reasonable assumption.
+		largestIndex := len(urls) - 1
+		selectedURLs = append(selectedURLs, urls[largestIndex])
+		selectedDescriptors = append(selectedDescriptors, descriptors[largestIndex])
+
+	case SrcsetPreferredDescriptors:
+		found := false
+		for _, preferred := range preferredDescriptors {
+			for i, descriptor := range descriptors {
+				if descriptor == preferred {
+					selectedURLs = append(selectedURLs, urls[i])
+					selectedDescriptors = append(selectedDescriptors, descriptor)
+					found = true
+					break
+				}
+			}
+			if found {
+				break
+			}
+		}
+		if !found {
+			// Default to the last if no preferred descriptor is found
+			lastIndex := len(urls) - 1
+			selectedURLs = append(selectedURLs, urls[lastIndex])
+			selectedDescriptors = append(selectedDescriptors, descriptors[lastIndex])
+		}
+
+	case SrcsetAllImages:
+		// Use all URLs and descriptors (default behavior)
+		selectedURLs = urls
+		selectedDescriptors = descriptors
+	}
+
+	return selectedURLs, selectedDescriptors
 }
