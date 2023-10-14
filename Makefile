@@ -54,6 +54,35 @@ test:
 build:
 	@(cd cmd/gophetch && go get -u && go mod verify && go build -v -ldflags='-s' -o=${PROJECT_ROOT}/bin/gophetch)
 
+## tag: create a new git tag version
+.PHONY: tag
+# Makefile command for version tagging with prompt
+# Makefile command for version tagging with prompt and optional 'v' prefix
+tag:
+	@if [ -z "$$version" ]; then \
+		echo "Error: version is not set. Use 'make tag version=x.y.z message=\"Some message\"'"; \
+		exit 1; \
+	fi
+	@if [ -z "$$message" ]; then \
+		echo "Error: message is not set. Use 'make tag version=x.y.z message=\"Some message\"'"; \
+		exit 1; \
+	fi
+	@if ! echo "$$version" | egrep -q '^(v[0-9]+\.[0-9]+\.[0-9]+(-alpha|-beta(\.[0-9]+)?)?)$$'; then \
+		echo "Error: Invalid version format. It should be like v1.2.3, v1.2.3-alpha, or v1.2.3-beta.1"; \
+		exit 1; \
+	fi
+	@if ! echo "$$version" | egrep -q '^v'; then \
+		version="v$$version"; \
+	fi
+	@latest_tag=`git describe --tags --abbrev=0 2>/dev/null` || echo "No existing tags"; \
+	echo "Current version: $$latest_tag"; \
+	echo "   About to tag: $$version"; \
+	read -p "Do you want to continue? [y/N]: " yn; \
+	case $$yn in \
+		 [Yy]* ) git tag -a $$version -m "$$message"; git push origin $$version;; \
+		 * ) echo "Tagging cancelled."; exit 1;; \
+	esac
+
 # ==================================================================================== #
 # Generation
 # ==================================================================================== #
