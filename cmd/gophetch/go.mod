@@ -3,7 +3,7 @@ module github.com/minsoft-io/gophetch/cmd
 go 1.21.1
 
 require (
-	github.com/minsoft-io/gophetch v0.0.0-20231014030435-ff0f106b095e
+	github.com/minsoft-io/gophetch v0.0.2
 	github.com/peterbourgon/ff/v3 v3.4.0
 )
 
