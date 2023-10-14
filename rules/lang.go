@@ -19,7 +19,7 @@ var langStrategies = []ExtractionStrategy{
 			"meta[property='og:locale']",
 			"meta[itemprop='inLanguage']",
 		},
-		Extractor: ExtractAttr("content"),
+		Extractor: ExtractMeta,
 	},
 	{
 		Selectors: []string{

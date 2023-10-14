@@ -30,7 +30,7 @@ var siteNameStrategies = []ExtractionStrategy{
 			"meta[itemprop='name']",
 			"meta[name='application-name']",
 		},
-		Extractor: ExtractAttr("content"),
+		Extractor: ExtractMeta,
 	},
 }
 

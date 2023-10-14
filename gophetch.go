@@ -144,6 +144,10 @@ func (g *Gophetch) FetchAndParse(targetURL string) (Result, error) {
 		if err == nil {
 			result.ApplyMetadata("readable", g.Parser.URL(), &fetchedData.Metadata)
 		}
+		result2, err := g.Extractor.ExtractRuleByKey(g.Parser.Node(), g.Parser.URL(), "lead_image")
+		if err == nil {
+			result2.ApplyMetadata("lead_image", g.Parser.URL(), &fetchedData.Metadata)
+		}
 		return fetchedData, nil
 	}
 

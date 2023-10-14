@@ -28,7 +28,7 @@ var canonicalStrategies = []ExtractionStrategy{
 			"meta[name='twitter:url']",
 			"meta[property='twitter:url']",
 		},
-		Extractor: ExtractAttr("content"),
+		Extractor: ExtractMeta,
 	},
 	{
 		Selectors: []string{

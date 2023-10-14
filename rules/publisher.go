@@ -32,7 +32,7 @@ var publisherStrategies = []ExtractionStrategy{
 			"meta[name='twitter:app:name:googleplay']",
 			"meta[property='twitter:app:name:googleplay']",
 		},
-		Extractor: ExtractAttr("content"),
+		Extractor: ExtractMeta,
 	},
 	{
 		Selectors: []string{

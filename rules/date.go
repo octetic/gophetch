@@ -37,7 +37,7 @@ var dateStrategies = []ExtractionStrategy{
 			"[itemprop*='datemodified']",
 			"[itemprop*='date']",
 		},
-		Extractor: ExtractAttr("content"),
+		Extractor: ExtractMeta,
 	},
 
 	// Time selectors

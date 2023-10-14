@@ -10,13 +10,11 @@ type Metadata struct {
 	FaviconURL       string   `json:"favicon_url"`
 	FeedURLs         []string `json:"feed_url"`
 	HTML             string   `json:"html"`
-	Image            Image    `json:"image"`
 	IsReadable       bool     `json:"is_readable"`
 	Kind             string   `json:"kind"`
 	Lang             string   `json:"lang"`
 	LeadImageInMeta  bool     `json:"lead_image_in_meta"`
 	LeadImageURL     string   `json:"lead_image_url"`
-	Logo             Image    `json:"logo"`
 	Meta             Meta     `json:"meta"`
 	Publisher        string   `json:"publisher"`
 	ReadableByline   string   `json:"readable_byline"`

@@ -13,9 +13,25 @@ import (
 
 const endpoint = "https://pro.microlink.io/"
 
+type MicrolinkMetadata struct {
+	Audio       metadata.Audio `json:"audio"`
+	Author      string         `json:"author"`
+	Date        string         `json:"date"`
+	HTML        string         `json:"html"`
+	Description string         `json:"description"`
+	Image       metadata.Image `json:"image"`
+	Meta        metadata.Meta  `json:"meta"`
+	Video       metadata.Video `json:"video"`
+	Lang        string         `json:"lang"`
+	Logo        metadata.Image `json:"logo"`
+	Publisher   string         `json:"publisher"`
+	Title       string         `json:"title"`
+	URL         string         `json:"url"`
+}
+
 type MicrolinkFetchedJSON struct {
 	Status  string            `json:"status"`
-	Data    metadata.Metadata `json:"data"`
+	Data    MicrolinkMetadata `json:"data"`
 	Message string            `json:"message"`
 }
 
@@ -95,7 +111,23 @@ func (m *MicrolinkFetcher) FetchHTML(targetURL string) (*http.Response, io.ReadC
 		return resp, nil, err
 	}
 
-	m.metadata = fetchedJSON.Data
+	//m.metadata = fetchedJSON.Data
+	m.metadata.URL = fetchedJSON.Data.URL
+	m.metadata.Title = fetchedJSON.Data.Title
+	m.metadata.Description = fetchedJSON.Data.Description
+	m.metadata.Author = fetchedJSON.Data.Author
+	m.metadata.Publisher = fetchedJSON.Data.Publisher
+	m.metadata.SiteName = fetchedJSON.Data.Publisher
+	m.metadata.CanonicalURL = fetchedJSON.Data.URL
+	m.metadata.LeadImageURL = fetchedJSON.Data.Image.URL
+	m.metadata.Meta = fetchedJSON.Data.Meta
+	m.metadata.FaviconURL = fetchedJSON.Data.Logo.URL
+	m.metadata.Video = fetchedJSON.Data.Video
+	m.metadata.Audio = fetchedJSON.Data.Audio
+	m.metadata.Date = fetchedJSON.Data.Date
+	m.metadata.Lang = fetchedJSON.Data.Lang
+	m.metadata.HTML = fetchedJSON.Data.HTML
+	m.metadata.Kind = "link"
 
 	// Find the html content
 	htmlContent := fetchedJSON.Data.HTML
