@@ -91,9 +91,26 @@ func NewImageInliner(opts ImageInlinerOptions) *ImageInliner {
 			}
 			return opts.ShouldInlineFunc
 		}(),
-		fetcher:    opts.Fetcher,
-		uploadFunc: opts.UploadFunc,
-		strategy:   opts.Strategy,
+		fetcher: func() ImageFetcher {
+			if opts.Fetcher == nil {
+				return &RealImageFetcher{}
+			}
+			return opts.Fetcher
+		}(),
+		uploadFunc: func() UploadFunc {
+			if opts.UploadFunc == nil {
+				return func(img *image.Image) (string, error) {
+					return "", fmt.Errorf("no upload function provided")
+				}
+			}
+			return opts.UploadFunc
+		}(),
+		strategy: func() InlineStrategy {
+			if opts.Strategy == "" {
+				return StrategyInline
+			}
+			return opts.Strategy
+		}(),
 		maxContentSize: func() int64 {
 			if opts.MaxContentSize == 0 {
 				return 100 * 1024
