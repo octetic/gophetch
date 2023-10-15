@@ -176,6 +176,11 @@ func (inliner *ImageInliner) InlineImages(readableHTML string) (string, error) {
 			for i := range node.Attr {
 				attr := &node.Attr[i]
 				if attr.Key == "src" || attr.Key == "srcset" || attr.Key == "poster" {
+					// If the image is already inlined, skip it
+					if strings.HasPrefix(attr.Val, "data:") {
+						continue
+					}
+
 					// Determine storage strategy based on file size, type, etc.
 					switch inliner.inlineStrategy {
 					case InlineAll:
