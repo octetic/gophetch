@@ -1,7 +1,9 @@
 package image_test
 
 import (
+	"encoding/base64"
 	"os"
+	"strings"
 	"testing"
 )
 
@@ -40,4 +42,36 @@ func TestMain(m *testing.M) {
 	code := m.Run() // Run tests
 	// You can add teardown here if needed
 	os.Exit(code)
+}
+
+// ReadAndEncodeImage reads an image file and returns its Base64 encoding
+func ReadAndEncodeImage(filePath string) (string, error) {
+	imageBytes, err := os.ReadFile("../testdata/" + filePath)
+	if err != nil {
+		return "", err
+	}
+
+	encoded := base64.StdEncoding.EncodeToString(imageBytes)
+
+	// Get the extension after the last dot
+	extension := strings.Split(filePath, ".")[1]
+
+	switch extension {
+	case "bmp":
+		return "data:image/bmp;base64," + encoded, nil
+	case "gif":
+		return "data:image/gif;base64," + encoded, nil
+	case "jpg", "jpeg":
+		return "data:image/jpeg;base64," + encoded, nil
+	case "png":
+		return "data:image/png;base64," + encoded, nil
+	case "tif", "tiff":
+		return "data:image/tiff;base64," + encoded, nil
+	case "webp":
+		return "data:image/webp;base64," + encoded, nil
+	case "ico":
+		return "data:image/x-icon;base64," + encoded, nil
+	default:
+		return "", nil
+	}
 }

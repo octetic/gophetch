@@ -4,11 +4,14 @@ import (
 	"bytes"
 	"crypto/rand"
 	"crypto/sha1"
+	"encoding/base64"
 	"encoding/hex"
+	"errors"
 	"fmt"
 	"image"
 	"io"
 	"net/http"
+	"strings"
 	"time"
 )
 
@@ -170,4 +173,35 @@ func NewImageFromURL(imgURL string) (*Image, error) {
 	img.Cache = ParseCacheHeader(resp.Header)
 	img.URL = imgURL
 	return img, nil
+}
+
+// NewImageFromDataURI will parse the data URI and return the image and metadata. It will attempt to get the
+// ContentType, Width, Height, Format, and ContentSize from the data URI as well.
+func NewImageFromDataURI(dataURI string) (*Image, error) {
+	imgData, err := DataURIToBytes(dataURI)
+	if err != nil {
+		return nil, err
+	}
+
+	img, err := NewImageFromBytes(imgData)
+	if err != nil {
+		return nil, err
+	}
+
+	img.URL = dataURI
+	return img, nil
+}
+
+// DataURIToBytes takes a Data URI and returns the byte data it contains.
+func DataURIToBytes(dataURI string) ([]byte, error) {
+	parts := strings.SplitN(dataURI, ",", 2)
+	if len(parts) < 2 {
+		return nil, errors.New("invalid Data URI")
+	}
+
+	// The second part contains the actual data
+	data := parts[1]
+
+	// Decode the Base64 data
+	return base64.StdEncoding.DecodeString(data)
 }

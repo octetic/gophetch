@@ -47,6 +47,10 @@ func FixRelativePath(url *url.URL, path string) string {
 		return path
 	}
 
+	if strings.HasPrefix(path, "data:") {
+		return path
+	}
+
 	var buf strings.Builder
 
 	if strings.HasPrefix(path, "//") {

@@ -291,3 +291,130 @@ func TestGenerateUniqueFilename(t *testing.T) {
 		}
 	})
 }
+
+func TestNewImageFromDataURI(t *testing.T) {
+	tests := []struct {
+		name                string
+		inputFile           string
+		input64             string
+		expectedContentType string
+		expectedWidth       int
+		expectedHeight      int
+		expectErr           bool
+	}{
+		{
+			name:                "ValidDataURI PNG",
+			inputFile:           "mark.png",
+			expectedContentType: "image/png",
+			expectedWidth:       100,
+			expectedHeight:      100,
+			expectErr:           false,
+		},
+		{
+			name:                "ValidDataURI JPG",
+			inputFile:           "mark.jpg",
+			expectedContentType: "image/jpeg",
+			expectedWidth:       100,
+			expectedHeight:      100,
+			expectErr:           false,
+		},
+		{
+			name:                "ValidDataURI WEBP",
+			inputFile:           "mark.webp",
+			expectedContentType: "image/webp",
+			expectedWidth:       100,
+			expectedHeight:      100,
+			expectErr:           false,
+		},
+		{
+			name:                "ValidDataURI ICO",
+			inputFile:           "mark.ico",
+			expectedContentType: "image/x-icon",
+			expectedWidth:       48,
+			expectedHeight:      48,
+			expectErr:           false,
+		},
+		{
+			name:      "InvalidDataURI",
+			input64:   "invalidData",
+			expectErr: true,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			base64Str := tt.input64
+			if tt.inputFile != "" {
+				base64Str, _ = ReadAndEncodeImage(tt.inputFile)
+			}
+			img, err := image.NewImageFromDataURI(base64Str)
+			if tt.expectErr {
+				assert.Error(t, err)
+			} else {
+				assert.NoError(t, err)
+				assert.NotNil(t, img)
+				if tt.expectedContentType != "" {
+					assert.Equal(t, tt.expectedContentType, img.ContentType)
+				}
+				if tt.expectedWidth != 0 {
+					assert.Equal(t, tt.expectedWidth, img.Width)
+				}
+				if tt.expectedHeight != 0 {
+					assert.Equal(t, tt.expectedHeight, img.Height)
+				}
+			}
+		})
+	}
+}
+
+func TestDataURIToBytes(t *testing.T) {
+	tests := []struct {
+		name      string
+		inputFile string
+		input64   string
+		expectErr bool
+	}{
+		{
+			name:      "ValidDataURI PNG",
+			inputFile: "mark.png",
+			expectErr: false,
+		},
+		{
+			name:      "ValidDataURI JPG",
+			inputFile: "mark.jpg",
+			expectErr: false,
+		},
+		{
+			name:      "ValidDataURI WEBP",
+			inputFile: "mark.webp",
+			expectErr: false,
+		},
+		{
+			name:      "InvalidDataURI",
+			inputFile: "",
+			input64:   "invalidData",
+			expectErr: true,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			var err error
+			base64Str := tt.input64
+			if tt.inputFile != "" {
+				base64Str, err = ReadAndEncodeImage(tt.inputFile)
+				if err != nil {
+					t.Fatalf("Error reading file: %v", err)
+				}
+			}
+			uriBytes, err := image.DataURIToBytes(base64Str)
+			if tt.expectErr {
+				assert.Error(t, err)
+			} else {
+				assert.NoError(t, err)
+				assert.NotNil(t, uriBytes)
+				// Add more assertions based on what DataURIToBytes is supposed to do
+			}
+		})
+	}
+}

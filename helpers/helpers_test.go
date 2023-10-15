@@ -59,6 +59,12 @@ func TestFixRelativePath(t *testing.T) {
 			expected: "http://example.com",
 		},
 		{
+			name:     "data URL",
+			url:      &url.URL{Scheme: "http", Host: "example.com"},
+			path:     "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+P+/HgAFhAJ/wr+3HwAAAABJRU5ErkJggg==",
+			expected: "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+P+/HgAFhAJ/wr+3HwAAAABJRU5ErkJggg==",
+		},
+		{
 			name:     "empty URL",
 			url:      &url.URL{},
 			path:     "/page",
