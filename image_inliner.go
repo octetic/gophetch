@@ -4,6 +4,7 @@ import (
 	"encoding/base64"
 	"fmt"
 	"log"
+	"regexp"
 	"strings"
 	"sync"
 
@@ -310,17 +311,43 @@ func (inliner *ImageInliner) parseSrcAndSrcset(attr *html.Attribute) ([]string, 
 	if attr.Key == "src" {
 		urls = []string{attr.Val}
 	} else {
-		entries := strings.Split(attr.Val, ",")
-		for _, entry := range entries {
-			parts := strings.Fields(strings.TrimSpace(entry))
-			if len(parts) > 0 {
-				urls = append(urls, parts[0])
-				if len(parts) > 1 {
-					descriptors = append(descriptors, parts[1])
-				} else {
-					descriptors = append(descriptors, "")
-				}
-			}
+		urls, descriptors = inliner.findSrcsetURLs(attr.Val)
+		//entries := strings.Split(attr.Val, ",")
+		//for _, entry := range entries {
+		//	parts := strings.Fields(strings.TrimSpace(entry))
+		//	if len(parts) > 0 {
+		//		urls = append(urls, parts[0])
+		//		if len(parts) > 1 {
+		//			descriptors = append(descriptors, parts[1])
+		//		} else {
+		//			descriptors = append(descriptors, "")
+		//		}
+		//	}
+		//}
+	}
+
+	return urls, descriptors
+}
+
+// findSrcsetURLs attempts to match all srcset URLs including their descriptors,
+// accounting for commas within the URLs.
+func (inliner *ImageInliner) findSrcsetURLs(srcset string) ([]string, []string) {
+	// This regex captures the URL and the descriptor as separate groups
+	// - (https://[^\s,]+) is a capturing group that matches a URL starting with https:// and continues without any space or comma.
+	// - \s+\d+[wx] matches one or more spaces followed by one or more digits and then 'w' or 'x', which represent the descriptors.
+	// - (,|\s|$) ensures that this pattern is followed by a comma, whitespace, or the end of the string, meaning it's the end of a URL/descriptor segment.
+	re := regexp.MustCompile(`(https://[^\s,]+)\s+(\d+[wx])(?:,|\s|$)`)
+
+	// Find all matches for the pattern.
+	matches := re.FindAllStringSubmatch(srcset, -1)
+
+	var urls []string
+	var descriptors []string
+
+	for _, match := range matches {
+		if len(match) > 2 {
+			urls = append(urls, match[1])               // The URL is in the first capture group
+			descriptors = append(descriptors, match[2]) // The descriptor is in the second capture group
 		}
 	}
 
