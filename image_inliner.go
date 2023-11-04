@@ -26,7 +26,7 @@ const (
 	InlineNone
 
 	// InlineHybrid indicates a hybrid approach to inlining images where images are inlined if they are smaller
-	// than the maxContentSize, maxWidth, and maxHeight options, and uploaded to cloud storage otherwise.
+	// than the maxInlinedSize, maxWidth, and maxHeight options, and uploaded to cloud storage otherwise.
 	InlineHybrid
 )
 
@@ -50,15 +50,15 @@ const (
 
 // ImageFetcher is an interface for fetching images
 type ImageFetcher interface {
-	NewImageFromURL(url string) (*image.Image, error)
+	NewImageFromURL(url string, maxSize int) (*image.Image, error)
 }
 
 // RealImageFetcher uses the actual implementation
 type RealImageFetcher struct{}
 
 // NewImageFromURL fetches an image from the given URL.
-func (r *RealImageFetcher) NewImageFromURL(url string) (*image.Image, error) {
-	return image.NewImageFromURL(url)
+func (r *RealImageFetcher) NewImageFromURL(url string, maxSize int) (*image.Image, error) {
+	return image.NewImageFromURL(url, maxSize)
 }
 
 // UploadFunc is the function signature to use for uploading images to cloud storage.
@@ -75,6 +75,7 @@ type ImageInliner struct {
 	inlineStrategy InlineStrategy
 	srcsetStrategy SrcsetStrategy
 	maxContentSize int64
+	maxInlinedSize int
 	maxWidth       int
 	maxHeight      int
 }
@@ -82,7 +83,7 @@ type ImageInliner struct {
 // ImageInlinerOptions are options for creating a new ImageInliner.
 type ImageInlinerOptions struct {
 	// ShouldInlineFunc is the function to use for determining whether an image should be inlined. Default is to inline
-	// if image size is less than 100KB or if dimensions are smaller than 800x600 (based on the maxContentSize, maxWidth,
+	// if image size is less than 100KB or if dimensions are smaller than 800x600 (based on the maxInlinedSize, maxWidth,
 	// and maxHeight options).
 	ShouldInlineFunc ShouldInlineFunc
 	// Fetcher is the ImageFetcher to use for fetching images.
@@ -93,8 +94,10 @@ type ImageInlinerOptions struct {
 	InlineStrategy InlineStrategy
 	// SrcsetStrategy is the strategy to use for handling srcset attributes. Default is SrcsetSmallestImage.
 	SrcsetStrategy SrcsetStrategy
-	// MaxContentSize is the maximum size in bytes for images to be processed in a hybrid strategy. Default is 100KB.
+	// MaxContentSize is the maximum size in bytes for images to be processed and uploaded. Default is 10MB.
 	MaxContentSize int64
+	// MaxInlinedSize is the maximum size in bytes for images to be processed in a hybrid strategy. Default is 100KB.
+	MaxInlinedSize int
 	// MaxWidth is the maximum width in pixels for images to be processed in a hybrid strategy. Default is 800.
 	MaxWidth int
 	// MaxHeight is the maximum height in pixels for images to be processed in a hybrid strategy. Default is 600.
@@ -103,16 +106,28 @@ type ImageInlinerOptions struct {
 
 // NewImageInliner creates a new ImageInliner with the given fetcher, upload function, and storage strategy.
 func NewImageInliner(opts ImageInlinerOptions) *ImageInliner {
+	inlinedSize := 100 * 1024
+	if opts.MaxInlinedSize > 0 {
+		inlinedSize = opts.MaxInlinedSize
+	}
+	maxWidth := 800
+	if opts.MaxWidth > 0 {
+		maxWidth = opts.MaxWidth
+	}
+	maxHeight := 600
+	if opts.MaxHeight > 0 {
+		maxHeight = opts.MaxHeight
+	}
 	return &ImageInliner{
 		ShouldInline: func() ShouldInlineFunc {
 			if opts.ShouldInlineFunc == nil {
 				return func(img *image.Image) bool {
 					// Inline if image size is less than 100KB
-					if img.ContentSize < 100*1024 {
+					if img.ContentSize < int64(inlinedSize) {
 						return true
 					}
 					// Inline if dimensions are smaller than 800x600
-					if img.Width < 800 && img.Height < 600 {
+					if img.Width < maxWidth && img.Height < maxHeight {
 						return true
 					}
 					return false
@@ -138,22 +153,13 @@ func NewImageInliner(opts ImageInlinerOptions) *ImageInliner {
 		srcsetStrategy: opts.SrcsetStrategy,
 		maxContentSize: func() int64 {
 			if opts.MaxContentSize == 0 {
-				return 100 * 1024
+				return 10 * 1024 * 1024
 			}
 			return opts.MaxContentSize
 		}(),
-		maxWidth: func() int {
-			if opts.MaxWidth == 0 {
-				return 800
-			}
-			return opts.MaxWidth
-		}(),
-		maxHeight: func() int {
-			if opts.MaxHeight == 0 {
-				return 600
-			}
-			return opts.MaxHeight
-		}(),
+		maxInlinedSize: inlinedSize,
+		maxWidth:       maxWidth,
+		maxHeight:      maxHeight,
 	}
 }
 
@@ -223,7 +229,7 @@ func (inliner *ImageInliner) fetchAndInline(attr *html.Attribute) string {
 	var newURLs []string
 
 	for i, url := range urls {
-		img, err := inliner.fetcher.NewImageFromURL(url)
+		img, err := inliner.fetcher.NewImageFromURL(url, int(inliner.maxContentSize))
 		if err != nil {
 			log.Printf("Failed to download image: %v", err)
 			continue
@@ -248,7 +254,7 @@ func (inliner *ImageInliner) processHybrid(attr *html.Attribute) string {
 	var newURLs []string
 
 	for i, url := range urls {
-		img, err := inliner.fetcher.NewImageFromURL(url)
+		img, err := inliner.fetcher.NewImageFromURL(url, int(inliner.maxContentSize))
 		if err != nil {
 			newURLs = append(newURLs, url)
 			continue
@@ -283,7 +289,7 @@ func (inliner *ImageInliner) uploadAndReplaceAttr(attr *html.Attribute) string {
 	var newURLs []string
 
 	for i, url := range urls {
-		img, err := inliner.fetcher.NewImageFromURL(url)
+		img, err := inliner.fetcher.NewImageFromURL(url, int(inliner.maxContentSize))
 		if err != nil {
 			log.Printf("Failed to download image: %v", err)
 			continue
@@ -312,18 +318,6 @@ func (inliner *ImageInliner) parseSrcAndSrcset(attr *html.Attribute) ([]string, 
 		urls = []string{attr.Val}
 	} else {
 		urls, descriptors = ExtractSrcset(attr.Val)
-		//entries := strings.Split(attr.Val, ",")
-		//for _, entry := range entries {
-		//	parts := strings.Fields(strings.TrimSpace(entry))
-		//	if len(parts) > 0 {
-		//		urls = append(urls, parts[0])
-		//		if len(parts) > 1 {
-		//			descriptors = append(descriptors, parts[1])
-		//		} else {
-		//			descriptors = append(descriptors, "")
-		//		}
-		//	}
-		//}
 	}
 
 	return urls, descriptors

@@ -201,7 +201,7 @@ func TestImageFromURL(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			img, err := image.NewImageFromURL(tt.imgURL)
+			img, err := image.NewImageFromURL(tt.imgURL, 0)
 			if tt.expectedErr != "" {
 				assert.EqualError(t, err, tt.expectedErr)
 			} else {

@@ -15,6 +15,9 @@ import (
 	"time"
 )
 
+// DefaultMaxImageSize represents the default maximum number of bytes we are willing to download for an image. (10 MB)
+const DefaultMaxImageSize = 10000000
+
 type Image struct {
 	Metadata
 	Bytes       []byte
@@ -149,9 +152,9 @@ func NewImageFromBytes(data []byte) (*Image, error) {
 	}, nil
 }
 
-// NewImageFromURL will download the image from the given URL and return the image and metadata. It will attempt to get the
+// NewImageFromURLOLD will download the image from the given URL and return the image and metadata. It will attempt to get the
 // ContentType, Width, Height, Format, and ContentSize from the downloaded bytes as well.
-func NewImageFromURL(imgURL string) (*Image, error) {
+func NewImageFromURLOLD(imgURL string) (*Image, error) {
 	resp, err := http.Get(imgURL)
 	if err != nil {
 		return nil, err
@@ -172,6 +175,61 @@ func NewImageFromURL(imgURL string) (*Image, error) {
 
 	img.Cache = ParseCacheHeader(resp.Header)
 	img.URL = imgURL
+	return img, nil
+}
+
+// NewImageFromURL will download the image from the given URL and return the image and metadata, but only if it is within the MaxImageSize.
+func NewImageFromURL(imgURL string, maxSize int) (*Image, error) {
+	if maxSize <= 0 {
+		maxSize = DefaultMaxImageSize
+	}
+
+	resp, err := http.Get(imgURL)
+	if err != nil {
+		return nil, err
+	}
+	defer func(Body io.ReadCloser) {
+		_ = Body.Close()
+	}(resp.Body)
+
+	var imgData bytes.Buffer
+	// Create a buffer to read into and count the bytes read.
+	buf := make([]byte, 1024) // 1KB chunks
+	totalRead := 0
+
+	for {
+		// Read a chunk.
+		n, err := resp.Body.Read(buf)
+		if err != nil && err != io.EOF {
+			return nil, err
+		}
+		totalRead += n
+
+		// Check if we have read too much.
+		if totalRead > maxSize {
+			return nil, fmt.Errorf("image exceeds max size of %d bytes", maxSize)
+		}
+
+		// Write the bytes to the buffer.
+		_, writeErr := imgData.Write(buf[:n])
+		if writeErr != nil {
+			return nil, writeErr
+		}
+
+		// Check for end of file.
+		if err == io.EOF {
+			break
+		}
+	}
+
+	img, imgErr := NewImageFromBytes(imgData.Bytes())
+	if imgErr != nil {
+		return nil, imgErr
+	}
+
+	img.Cache = ParseCacheHeader(resp.Header)
+	img.URL = imgURL
+
 	return img, nil
 }
 
