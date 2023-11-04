@@ -311,7 +311,7 @@ func (inliner *ImageInliner) parseSrcAndSrcset(attr *html.Attribute) ([]string, 
 	if attr.Key == "src" {
 		urls = []string{attr.Val}
 	} else {
-		urls, descriptors = inliner.findSrcsetURLs(attr.Val)
+		urls, descriptors = ExtractSrcset(attr.Val)
 		//entries := strings.Split(attr.Val, ",")
 		//for _, entry := range entries {
 		//	parts := strings.Fields(strings.TrimSpace(entry))
@@ -329,25 +329,25 @@ func (inliner *ImageInliner) parseSrcAndSrcset(attr *html.Attribute) ([]string, 
 	return urls, descriptors
 }
 
-// findSrcsetURLs attempts to match all srcset URLs including their descriptors,
+// ExtractSrcset attempts to match all srcset URLs including their descriptors,
 // accounting for commas within the URLs.
-func (inliner *ImageInliner) findSrcsetURLs(srcset string) ([]string, []string) {
+func ExtractSrcset(srcset string) ([]string, []string) {
 	// This regex captures the URL and the descriptor as separate groups
-	// - (https://[^\s,]+) is a capturing group that matches a URL starting with https:// and continues without any space or comma.
-	// - \s+\d+[wx] matches one or more spaces followed by one or more digits and then 'w' or 'x', which represent the descriptors.
+	// - (https://[^\s]+) is a capturing group that matches a URL starting with https:// and continues without any space or comma.
+	// - \s+\d+(?:\.\d+)?[wx] matches one or more spaces followed by one or more digits (with optional decimal) and then 'w' or 'x', which represent the descriptors.
 	// - (,|\s|$) ensures that this pattern is followed by a comma, whitespace, or the end of the string, meaning it's the end of a URL/descriptor segment.
-	re := regexp.MustCompile(`(https://[^\s,]+)\s+(\d+[wx])(?:,|\s|$)`)
+	re := regexp.MustCompile(`(https://\S+)((\s+\d+(?:\.\d+)?[wx])+)(?:,|$)`)
 
 	// Find all matches for the pattern.
-	matches := re.FindAllStringSubmatch(srcset, -1)
+	matches := re.FindAllStringSubmatch(strings.TrimSpace(srcset), -1)
 
 	var urls []string
 	var descriptors []string
 
 	for _, match := range matches {
 		if len(match) > 2 {
-			urls = append(urls, match[1])               // The URL is in the first capture group
-			descriptors = append(descriptors, match[2]) // The descriptor is in the second capture group
+			urls = append(urls, match[1])                                  // The URL is in the first capture group
+			descriptors = append(descriptors, strings.TrimSpace(match[2])) // The descriptor is in the second capture group
 		}
 	}
 
