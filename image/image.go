@@ -16,7 +16,7 @@ import (
 )
 
 // DefaultMaxImageSize represents the default maximum number of bytes we are willing to download for an image. (10 MB)
-const DefaultMaxImageSize = 10000000
+const DefaultMaxImageSize = 10 * 1024 * 1024
 
 type Image struct {
 	Metadata
