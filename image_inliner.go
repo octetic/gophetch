@@ -166,7 +166,10 @@ func (inliner *ImageInliner) InlineImages(readableHTML string) (string, error) {
 	}
 
 	// Find all image nodes
-	imgSelector := cascadia.MustCompile("img, video")
+	imgSelector, err := cascadia.Compile("img, video, picture > source")
+	if err != nil {
+		return "", fmt.Errorf("failed to compile selector: %v", err)
+	}
 	imgVideoNodes := imgSelector.MatchAll(doc)
 
 	for _, node := range imgVideoNodes {
