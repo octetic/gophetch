@@ -339,26 +339,42 @@ func (inliner *ImageInliner) selectSrcsetURL(urls []string, descriptors []string
 	case SrcsetSmallestImage:
 		// Assuming the first descriptor usually points to the smallest image. This is not always true, but it's a
 		// reasonable assumption.
-		smallestIndex := 0
-		selectedURLs = append(selectedURLs, urls[smallestIndex])
-		selectedDescriptors = append(selectedDescriptors, descriptors[smallestIndex])
+
+		// Find the first image that starts with "https://"
+		for i, descriptor := range descriptors {
+			if strings.HasPrefix(urls[i], "https://") || strings.HasPrefix(urls[i], "http://") {
+				smallestIndex := i
+				selectedURLs = append(selectedURLs, urls[smallestIndex])
+				selectedDescriptors = append(selectedDescriptors, descriptor)
+				break
+			}
+		}
 
 	case SrcsetLargestImage:
 		// Assuming the last descriptor usually points to the largest image. This is not always true, but it's a
 		// reasonable assumption.
-		largestIndex := len(urls) - 1
-		selectedURLs = append(selectedURLs, urls[largestIndex])
-		selectedDescriptors = append(selectedDescriptors, descriptors[largestIndex])
+
+		// Find the first image that starts with "https://", starting from the end
+		for i := len(urls) - 1; i >= 0; i-- {
+			if strings.HasPrefix(urls[i], "https://") || strings.HasPrefix(urls[i], "http://") {
+				largestIndex := i
+				selectedURLs = append(selectedURLs, urls[largestIndex])
+				selectedDescriptors = append(selectedDescriptors, descriptors[largestIndex])
+				break
+			}
+		}
 
 	case SrcsetPreferredDescriptors:
 		found := false
 		for _, preferred := range preferredDescriptors {
 			for i, descriptor := range descriptors {
 				if descriptor == preferred {
-					selectedURLs = append(selectedURLs, urls[i])
-					selectedDescriptors = append(selectedDescriptors, descriptor)
-					found = true
-					break
+					if strings.HasPrefix(urls[i], "https://") || strings.HasPrefix(urls[i], "http://") {
+						selectedURLs = append(selectedURLs, urls[i])
+						selectedDescriptors = append(selectedDescriptors, descriptor)
+						found = true
+						break
+					}
 				}
 			}
 			if found {
