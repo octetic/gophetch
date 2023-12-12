@@ -10,7 +10,7 @@ import (
 	"golang.org/x/net/html"
 	// import your own packages here
 
-	"github.com/minsoft-io/gophetch/rules"
+	"github.com/octetic/gophetch/rules"
 )
 
 func TestDescriptionRuleSelectors(t *testing.T) {

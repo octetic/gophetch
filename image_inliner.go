@@ -11,7 +11,7 @@ import (
 	"github.com/andybalholm/cascadia"
 	"golang.org/x/net/html"
 
-	"github.com/minsoft-io/gophetch/image"
+	"github.com/octetic/gophetch/image"
 )
 
 // InlineStrategy represents the different strategies for inlining images.

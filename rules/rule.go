@@ -6,8 +6,8 @@ import (
 
 	"golang.org/x/net/html"
 
-	"github.com/minsoft-io/gophetch/helpers"
-	"github.com/minsoft-io/gophetch/metadata"
+	"github.com/octetic/gophetch/helpers"
+	"github.com/octetic/gophetch/metadata"
 )
 
 var ErrValueNotFound = errors.New("no value found")

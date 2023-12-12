@@ -1,9 +1,9 @@
-module github.com/minsoft-io/gophetch/cmd
+module github.com/octetic/gophetch/cmd
 
 go 1.21.1
 
 require (
-	github.com/minsoft-io/gophetch v0.0.7
+	github.com/octetic/gophetch v0.0.7
 	github.com/peterbourgon/ff/v3 v3.4.0
 )
 

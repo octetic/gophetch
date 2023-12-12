@@ -9,7 +9,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"golang.org/x/net/html"
 
-	"github.com/minsoft-io/gophetch/rules"
+	"github.com/octetic/gophetch/rules"
 )
 
 func TestAuthorRuleSelectors(t *testing.T) {

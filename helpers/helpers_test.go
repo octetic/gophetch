@@ -6,7 +6,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
-	"github.com/minsoft-io/gophetch/helpers"
+	"github.com/octetic/gophetch/helpers"
 )
 
 func TestFixRelativePath(t *testing.T) {

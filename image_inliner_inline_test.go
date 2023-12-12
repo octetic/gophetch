@@ -6,7 +6,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
-	"github.com/minsoft-io/gophetch"
+	"github.com/octetic/gophetch"
 )
 
 func TestInlinerInlineStrategy(t *testing.T) {

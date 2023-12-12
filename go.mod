@@ -1,4 +1,4 @@
-module github.com/minsoft-io/gophetch
+module github.com/octetic/gophetch
 
 go 1.21.1
 
@@ -20,6 +20,7 @@ require (
 	github.com/gorilla/css v1.0.0 // indirect
 	github.com/jsummers/gobmp v0.0.0-20230614200233-a9de23ed2e25 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
+	github.com/stretchr/objx v0.5.0 // indirect
 	golang.org/x/text v0.13.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )

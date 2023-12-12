@@ -1,7 +1,7 @@
 package sites
 
 import (
-	"github.com/minsoft-io/gophetch/rules"
+	"github.com/octetic/gophetch/rules"
 )
 
 // Site is the interface for a site. Sites are used to define the rules for a specific site. This can be used to

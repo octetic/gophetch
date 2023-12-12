@@ -9,7 +9,7 @@ import (
 
 	"github.com/stretchr/testify/mock"
 
-	"github.com/minsoft-io/gophetch/image"
+	"github.com/octetic/gophetch/image"
 )
 
 // MockImageFetcher returns a mock image

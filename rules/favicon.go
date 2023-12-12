@@ -6,7 +6,7 @@ import (
 
 	"golang.org/x/net/html"
 
-	"github.com/minsoft-io/gophetch/image"
+	"github.com/octetic/gophetch/image"
 )
 
 // FaviconRule is the rule for extracting the favicon URL of a page.

@@ -8,8 +8,8 @@ import (
 	"github.com/stretchr/testify/assert"
 	"golang.org/x/net/html"
 
-	"github.com/minsoft-io/gophetch"
-	"github.com/minsoft-io/gophetch/metadata"
+	"github.com/octetic/gophetch"
+	"github.com/octetic/gophetch/metadata"
 )
 
 // TODO(patrick): Add more tests

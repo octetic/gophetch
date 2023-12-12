@@ -4,7 +4,7 @@ import (
 	"io"
 	"net/http"
 
-	"github.com/minsoft-io/gophetch/metadata"
+	"github.com/octetic/gophetch/metadata"
 )
 
 // HTMLFetcher is the interface that encapsulates the HTML fetcher. An HTML fetcher is responsible for fetching the

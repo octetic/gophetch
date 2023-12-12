@@ -7,7 +7,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
-	"github.com/minsoft-io/gophetch/image"
+	"github.com/octetic/gophetch/image"
 )
 
 func TestParseCacheHeader(t *testing.T) {

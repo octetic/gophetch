@@ -1,6 +1,6 @@
 package sites
 
-import "github.com/minsoft-io/gophetch/rules"
+import "github.com/octetic/gophetch/rules"
 
 // YouTube is a site overrider for YouTube data extraction.
 type YouTube struct{}

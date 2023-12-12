@@ -9,7 +9,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
-	"github.com/minsoft-io/gophetch/image"
+	"github.com/octetic/gophetch/image"
 )
 
 // assuming these functions are defined in the same package for simplicity

@@ -5,7 +5,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
-	"github.com/minsoft-io/gophetch"
+	"github.com/octetic/gophetch"
 )
 
 func TestExtractSrcset(t *testing.T) {
