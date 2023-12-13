@@ -1,6 +1,6 @@
 module github.com/octetic/gophetch
 
-go 1.21.1
+go 1.20
 
 require (
 	github.com/andybalholm/cascadia v1.3.2
