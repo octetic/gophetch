@@ -5,6 +5,7 @@ type Metadata struct {
 	Audio            Audio    `json:"audio"`
 	Author           string   `json:"author"`
 	CanonicalURL     string   `json:"canonical_url"`
+	CleanURL         string   `json:"clean_url"`
 	Date             string   `json:"date"`
 	Description      string   `json:"description"`
 	FaviconURL       string   `json:"favicon_url"`

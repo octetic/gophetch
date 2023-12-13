@@ -11,6 +11,7 @@ import (
 	"golang.org/x/net/html"
 
 	"github.com/octetic/gophetch/fetchers"
+	"github.com/octetic/gophetch/helpers"
 	"github.com/octetic/gophetch/metadata"
 	"github.com/octetic/gophetch/sites"
 )
@@ -167,6 +168,7 @@ func (g *Gophetch) FetchAndParse(targetURL string) (Result, error) {
 	}
 
 	fetchedData.Metadata = data
+	fetchedData.Metadata.CleanURL = helpers.CleanURL(targetURL)
 	return fetchedData, nil
 }
 
