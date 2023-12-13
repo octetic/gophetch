@@ -2,36 +2,36 @@ package metadata
 
 // Metadata is the struct that encapsulates the extracted metadata.
 type Metadata struct {
-	Audio            Audio    `json:"audio"`
-	Author           string   `json:"author"`
-	CanonicalURL     string   `json:"canonical_url"`
-	CleanURL         string   `json:"clean_url"`
-	Date             string   `json:"date"`
-	Description      string   `json:"description"`
-	FaviconURL       string   `json:"favicon_url"`
-	FeedURLs         []string `json:"feed_url"`
-	HTML             string   `json:"html"`
-	IsReadable       bool     `json:"is_readable"`
-	Kind             string   `json:"kind"`
-	Lang             string   `json:"lang"`
-	LeadImageInMeta  bool     `json:"lead_image_in_meta"`
-	LeadImageURL     string   `json:"lead_image_url"`
-	Meta             Meta     `json:"meta"`
-	Publisher        string   `json:"publisher"`
-	ReadableByline   string   `json:"readable_byline"`
-	ReadableExcerpt  string   `json:"readable_excerpt"`
-	ReadableHTML     string   `json:"readable_html"`
-	ReadableImage    string   `json:"readable_image"`
-	ReadableLang     string   `json:"readable_lang"`
-	ReadableLength   int      `json:"readable_length"`
-	ReadableSiteName string   `json:"readable_site_name"`
-	ReadableText     string   `json:"readable_text"`
-	ReadableTitle    string   `json:"readable_title"`
-	SiteName         string   `json:"site_name"`
-	Title            string   `json:"title"`
-	URL              string   `json:"url"`
-	Video            Video    `json:"video"`
-	Dynamic          map[string]any
+	Audio            Audio          `json:"audio"`
+	Author           string         `json:"author"`
+	CanonicalURL     string         `json:"canonical_url"`
+	CleanURL         string         `json:"clean_url"`
+	Date             string         `json:"date"`
+	Description      string         `json:"description"`
+	FaviconURL       string         `json:"favicon_url"`
+	FeedURLs         []string       `json:"feed_url"`
+	HTML             string         `json:"html"`
+	IsReadable       bool           `json:"is_readable"`
+	Kind             string         `json:"kind"`
+	Lang             string         `json:"lang"`
+	LeadImageInMeta  bool           `json:"lead_image_in_meta"`
+	LeadImageURL     string         `json:"lead_image_url"`
+	Meta             Meta           `json:"meta"`
+	Publisher        string         `json:"publisher"`
+	ReadableByline   string         `json:"readable_byline"`
+	ReadableExcerpt  string         `json:"readable_excerpt"`
+	ReadableHTML     string         `json:"readable_html"`
+	ReadableImage    string         `json:"readable_image"`
+	ReadableLang     string         `json:"readable_lang"`
+	ReadableLength   int            `json:"readable_length"`
+	ReadableSiteName string         `json:"readable_site_name"`
+	ReadableText     string         `json:"readable_text"`
+	ReadableTitle    string         `json:"readable_title"`
+	SiteName         string         `json:"site_name"`
+	Title            string         `json:"title"`
+	URL              string         `json:"url"`
+	Video            Video          `json:"video"`
+	Dynamic          map[string]any `json:"dynamic"`
 }
 
 // Meta is the struct that encapsulates the extracted metadata from <meta> tags
