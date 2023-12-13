@@ -100,7 +100,9 @@ func ExtractAttr(attribute string) ExtractFunc {
 func ExtractMeta(node *html.Node, targetURL *url.URL, selectors []string) ExtractResult {
 	fn := ExtractAttr("content")
 	result := fn(node, targetURL, selectors)
-	if result.Found() {
+
+	// Check if the result is found, is not nil, and the stripped value is not empty
+	if result.Found() && result.Value() != nil && strings.TrimSpace(result.Value().(string)) != "" {
 		sr := result.(*StringResult)
 		return NewStringResult(
 			sr.value,
