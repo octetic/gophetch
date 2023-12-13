@@ -25,6 +25,8 @@ var authorStrategies = []ExtractionStrategy{
 	{
 		Selectors: []string{
 			"meta[name='author']",
+			"meta[name='og:author']",
+			"meta[name='twitter:creator']",
 			"meta[property='article:author']",
 			"meta[property='dc:creator']",
 			`meta[property="schema:author"]`,
