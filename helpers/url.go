@@ -2,6 +2,7 @@ package helpers
 
 import (
 	"net/url"
+	"strings"
 )
 
 // Params is a list of tracking parameters to remove from URLs.
@@ -16,43 +17,46 @@ var params = []string{"fbclid", "gclid", "gclsrc", "utm_content", "utm_term", "u
 	"hsa_mt", "hsa_src", "hsa_ad", "hsa_acc", "hsa_net", "hsa_kw", "hsa_tgt", "hsa_ver", "_branch_match_id", "mkevt",
 	"mkcid", "mkrid", "campid", "toolid", "customid", "igshid", "si"}
 
-// CleanURL removes tracking parameters from the given URL.
-func CleanURL(u string) string {
-	nu, err := url.Parse(u)
-	if err != nil {
-		return u
-	}
-
-	for _, param := range params {
-		nu = deleteParam(nu, param)
-	}
-
-	return nu.String()
-}
-
 // IsURLValid checks if the given URL is valid.
 func IsURLValid(u string) bool {
-	_, err := url.ParseRequestURI(u)
+	parsedURL, err := url.ParseRequestURI(u)
+	if err != nil {
+		return false
+	}
 
-	// Ensure the url starts with a valid scheme
-	if err == nil {
-		for _, scheme := range []string{"http", "https"} {
-			if u[:len(scheme)+1] == scheme+":" {
-				err = nil
-				break
-			}
+	// Check scheme
+	if parsedURL.Scheme != "http" && parsedURL.Scheme != "https" {
+		return false
+	}
+
+	// Check host. This is a very basic check, but it's good enough for now.
+	host := parsedURL.Hostname()
+	if host == "" || !strings.Contains(host, ".") {
+		return false
+	}
+
+	return true
+}
+
+// CleanURL removes tracking parameters from the given URL.
+func CleanURL(u *url.URL) string {
+	return deleteParams(u, params).String()
+}
+
+// deleteParams removes multiple query parameters from the URL.
+func deleteParams(u *url.URL, keys []string) *url.URL {
+	values := u.Query()
+	changed := false
+
+	for _, key := range keys {
+		if _, found := values[key]; found {
+			values.Del(key)
+			changed = true
 		}
 	}
 
-	return err == nil
-}
-
-func deleteParam(u *url.URL, key string) *url.URL {
-	nu := *u
-	values := nu.Query()
-
-	values.Del(key)
-
-	nu.RawQuery = values.Encode()
-	return &nu
+	if changed {
+		u.RawQuery = values.Encode()
+	}
+	return u
 }

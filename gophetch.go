@@ -168,7 +168,7 @@ func (g *Gophetch) FetchAndParse(targetURL string) (Result, error) {
 	}
 
 	fetchedData.Metadata = data
-	fetchedData.Metadata.CleanURL = helpers.CleanURL(targetURL)
+	fetchedData.Metadata.CleanURL = helpers.CleanURL(g.Parser.URL())
 	return fetchedData, nil
 }
 
