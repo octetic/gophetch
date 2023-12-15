@@ -1,6 +1,7 @@
 package gophetch_test
 
 import (
+	"net/url"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -10,6 +11,9 @@ import (
 
 func TestPrefixStrategy(t *testing.T) {
 	SetupFiles()
+
+	relativeURL, err := url.Parse("https://example.com/foo/bar/baz")
+	assert.NoError(t, err)
 
 	prefixProxy := "https://example.art/proxy"
 
@@ -86,6 +90,17 @@ func TestPrefixStrategy(t *testing.T) {
 			</picture>
 			</body></html>`,
 		},
+		{
+			name: "multiple images with relative URLs",
+			inputHTML: `<html><head></head><body>
+			<img src="/mark.jpg">
+			<img srcset="/mark.png 1x,/mark.webp 2x">
+			</body></html>`,
+			expectedHTML: `<html><head></head><body>
+			<img src="` + prefixProxy + `?url=https://example.com/mark.jpg"/>
+			<img srcset="` + prefixProxy + `?url=https://example.com/mark.png 1x, ` + prefixProxy + `?url=https://example.com/mark.webp 2x"/>
+			</body></html>`,
+		},
 	}
 
 	for _, tt := range tests {
@@ -94,8 +109,9 @@ func TestPrefixStrategy(t *testing.T) {
 			inliner := gophetch.NewImageInliner(gophetch.ImageInlinerOptions{
 				Fetcher:        mockFetcher,
 				InlineStrategy: gophetch.InlineMediaProxy,
-				MediaProxyURL:  prefixProxy,
 				SrcsetStrategy: gophetch.SrcsetAllImages,
+				MediaProxyURL:  prefixProxy,
+				RelativeURL:    relativeURL,
 			})
 
 			actualHTML, err := inliner.InlineImages(tt.inputHTML)

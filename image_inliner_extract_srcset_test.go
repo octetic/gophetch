@@ -1,6 +1,7 @@
 package gophetch_test
 
 import (
+	"net/url"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -103,6 +104,26 @@ func TestExtractSrcset(t *testing.T) {
 			expectedDescs: []string{"424w", "848w"},
 		},
 		{
+			name:   "multiple sources with relative URLS",
+			srcset: `/image1.png 1x, /image2.png 2x, /image3.png 3x`,
+			expectedURLs: []string{
+				"https://example.com/image1.png",
+				"https://example.com/image2.png",
+				"https://example.com/image3.png",
+			},
+			expectedDescs: []string{"1x", "2x", "3x"},
+		},
+		{
+			name:   "multiple sources with relative schemes and width",
+			srcset: `//example.com/image1.png 484w 1x, //example.com/image2.png 968w 2x, //example.com/image3.png 1936w 3x`,
+			expectedURLs: []string{
+				"https://example.com/image1.png",
+				"https://example.com/image2.png",
+				"https://example.com/image3.png",
+			},
+			expectedDescs: []string{"484w 1x", "968w 2x", "1936w 3x"},
+		},
+		{
 			name:          "empty srcset",
 			srcset:        ``,
 			expectedURLs:  nil,
@@ -111,9 +132,12 @@ func TestExtractSrcset(t *testing.T) {
 		// Add more test cases as needed
 	}
 
+	relativeURL, err := url.Parse("https://example.com/foo/bar/baz")
+	assert.NoError(t, err)
+
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			urls, descs := gophetch.ExtractSrcset(tt.srcset)
+			urls, descs := gophetch.ExtractSrcset(tt.srcset, relativeURL)
 			assert.Equal(t, tt.expectedURLs, urls)
 			assert.Equal(t, tt.expectedDescs, descs)
 		})

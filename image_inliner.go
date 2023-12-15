@@ -4,6 +4,7 @@ import (
 	"encoding/base64"
 	"fmt"
 	"log"
+	"net/url"
 	"regexp"
 	"strings"
 	"sync"
@@ -11,6 +12,7 @@ import (
 	"github.com/andybalholm/cascadia"
 	"golang.org/x/net/html"
 
+	"github.com/octetic/gophetch/helpers"
 	"github.com/octetic/gophetch/image"
 )
 
@@ -82,6 +84,7 @@ type ImageInliner struct {
 	maxWidth       int
 	maxHeight      int
 	mediaProxyURL  string
+	relativeURL    *url.URL
 }
 
 // ImageInlinerOptions are options for creating a new ImageInliner.
@@ -108,6 +111,8 @@ type ImageInlinerOptions struct {
 	MaxHeight int
 	// MediaProxyURL is the URL to prefix to the image URLs when using the InlineMediaProxy strategy.
 	MediaProxyURL string
+	// RelativeURL is the URL to use to fix relative URLs by making them absolute.
+	RelativeURL *url.URL
 }
 
 // NewImageInliner creates a new ImageInliner with the given fetcher, upload function, and storage strategy.
@@ -168,6 +173,7 @@ func NewImageInliner(opts ImageInlinerOptions) *ImageInliner {
 		maxWidth:       maxWidth,
 		maxHeight:      maxHeight,
 		mediaProxyURL:  opts.MediaProxyURL,
+		relativeURL:    opts.RelativeURL,
 	}
 }
 
@@ -238,8 +244,8 @@ func (inliner *ImageInliner) fetchAndInline(attr *html.Attribute) string {
 
 	var newURLs []string
 
-	for i, url := range urls {
-		img, err := inliner.fetcher.NewImageFromURL(url, int(inliner.maxContentSize))
+	for i, u := range urls {
+		img, err := inliner.fetcher.NewImageFromURL(u, int(inliner.maxContentSize))
 		if err != nil {
 			log.Printf("Failed to download image: %v", err)
 			continue
@@ -264,8 +270,12 @@ func (inliner *ImageInliner) prefixProxy(attr *html.Attribute) string {
 
 	var newURLs []string
 
-	for i, url := range urls {
-		newURL := fmt.Sprintf("%s?url=%s", inliner.mediaProxyURL, url)
+	for i, u := range urls {
+		if inliner.relativeURL != nil {
+			u = helpers.FixRelativePath(inliner.relativeURL, u)
+		}
+
+		newURL := fmt.Sprintf("%s?url=%s", inliner.mediaProxyURL, u)
 		if attr.Key == "srcset" && descriptors[i] != "" {
 			newURL += " " + descriptors[i]
 		}
@@ -283,10 +293,10 @@ func (inliner *ImageInliner) processHybrid(attr *html.Attribute) string {
 
 	var newURLs []string
 
-	for i, url := range urls {
-		img, err := inliner.fetcher.NewImageFromURL(url, int(inliner.maxContentSize))
+	for i, u := range urls {
+		img, err := inliner.fetcher.NewImageFromURL(u, int(inliner.maxContentSize))
 		if err != nil {
-			newURLs = append(newURLs, url)
+			newURLs = append(newURLs, u)
 			continue
 		}
 
@@ -297,7 +307,7 @@ func (inliner *ImageInliner) processHybrid(attr *html.Attribute) string {
 			newURL, err = inliner.uploadFunc(img)
 			if err != nil {
 				// If upload fails, use the original URL
-				newURL = url
+				newURL = u
 			}
 		}
 
@@ -318,8 +328,8 @@ func (inliner *ImageInliner) uploadAndReplaceAttr(attr *html.Attribute) string {
 
 	var newURLs []string
 
-	for i, url := range urls {
-		img, err := inliner.fetcher.NewImageFromURL(url, int(inliner.maxContentSize))
+	for i, u := range urls {
+		img, err := inliner.fetcher.NewImageFromURL(u, int(inliner.maxContentSize))
 		if err != nil {
 			log.Printf("Failed to download image: %v", err)
 			continue
@@ -328,7 +338,7 @@ func (inliner *ImageInliner) uploadAndReplaceAttr(attr *html.Attribute) string {
 		newURL, err := inliner.uploadFunc(img)
 		if err != nil {
 			// If upload fails, use the original URL
-			newURL = url
+			newURL = u
 		}
 
 		if attr.Key == "srcset" && descriptors[i] != "" {
@@ -347,7 +357,7 @@ func (inliner *ImageInliner) parseSrcAndSrcset(attr *html.Attribute) ([]string, 
 	if attr.Key == "src" {
 		urls = []string{attr.Val}
 	} else {
-		urls, descriptors = ExtractSrcset(attr.Val)
+		urls, descriptors = ExtractSrcset(attr.Val, inliner.relativeURL)
 	}
 
 	return urls, descriptors
@@ -355,12 +365,13 @@ func (inliner *ImageInliner) parseSrcAndSrcset(attr *html.Attribute) ([]string, 
 
 // ExtractSrcset attempts to match all srcset URLs including their descriptors,
 // accounting for commas within the URLs.
-func ExtractSrcset(srcset string) ([]string, []string) {
+func ExtractSrcset(srcset string, relativeURL *url.URL) ([]string, []string) {
 	// This regex captures the URL and the descriptor as separate groups
-	// - (https://[^\s]+) is a capturing group that matches a URL starting with https:// and continues without any space or comma.
+	// - (?:https?://|//|/)\S+ is a capturing group that matches a URL starting with https:// and continues without any space or comma.
 	// - \s+\d+(?:\.\d+)?[wx] matches one or more spaces followed by one or more digits (with optional decimal) and then 'w' or 'x', which represent the descriptors.
 	// - (,|\s|$) ensures that this pattern is followed by a comma, whitespace, or the end of the string, meaning it's the end of a URL/descriptor segment.
-	re := regexp.MustCompile(`(https://\S+)((\s+\d+(?:\.\d+)?[wx])+)(?:,|$)`)
+	// re := regexp.MustCompile(`(https://\S+)((\s+\d+(?:\.\d+)?[wx])+)(?:,|$)`)
+	re := regexp.MustCompile(`((?:https?://|//|/)\S+)((\s+\d+(?:\.\d+)?[wx])+)(?:,|$)`)
 
 	// Find all matches for the pattern.
 	matches := re.FindAllStringSubmatch(strings.TrimSpace(srcset), -1)
@@ -370,6 +381,9 @@ func ExtractSrcset(srcset string) ([]string, []string) {
 
 	for _, match := range matches {
 		if len(match) > 2 {
+			if relativeURL != nil {
+				match[1] = helpers.FixRelativePath(relativeURL, match[1])
+			}
 			urls = append(urls, match[1])                                  // The URL is in the first capture group
 			descriptors = append(descriptors, strings.TrimSpace(match[2])) // The descriptor is in the second capture group
 		}
@@ -380,6 +394,8 @@ func ExtractSrcset(srcset string) ([]string, []string) {
 
 // selectSrcsetURL selects URLs based on the chosen SrcsetStrategy.
 // It returns a slice of selected URLs and their corresponding descriptors.
+//
+//goland:noinspection HttpUrlsUsage
 func (inliner *ImageInliner) selectSrcsetURL(urls []string, descriptors []string) ([]string, []string) {
 	var selectedURLs []string
 	var selectedDescriptors []string
