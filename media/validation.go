@@ -1,4 +1,4 @@
-package image
+package media
 
 // IsValidImage checks if the given URL is a valid image.
 func IsValidImage(url string) bool {

@@ -1,4 +1,4 @@
-package image_test
+package media_test
 
 import (
 	"net/http"
@@ -7,21 +7,21 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
-	"github.com/octetic/gophetch/image"
+	"github.com/octetic/gophetch/media"
 )
 
 func TestParseCacheHeader(t *testing.T) {
 	testCases := []struct {
 		name     string
 		header   http.Header
-		expected image.Cache
+		expected media.Cache
 	}{
 		{
 			name: "Cache-Control no-cache",
 			header: http.Header{
 				"Cache-Control": []string{"no-cache"},
 			},
-			expected: image.Cache{
+			expected: media.Cache{
 				Available:      true,
 				MaxAge:         -1,
 				NoCache:        true,
@@ -34,7 +34,7 @@ func TestParseCacheHeader(t *testing.T) {
 			header: http.Header{
 				"Cache-Control": []string{"no-store"},
 			},
-			expected: image.Cache{
+			expected: media.Cache{
 				Available:      true,
 				MaxAge:         -1,
 				NoCache:        false,
@@ -47,7 +47,7 @@ func TestParseCacheHeader(t *testing.T) {
 			header: http.Header{
 				"Cache-Control": []string{"must-revalidate"},
 			},
-			expected: image.Cache{
+			expected: media.Cache{
 				Available:      true,
 				MaxAge:         -1,
 				NoCache:        false,
@@ -60,7 +60,7 @@ func TestParseCacheHeader(t *testing.T) {
 			header: http.Header{
 				"Cache-Control": []string{"no-cache,no-store"},
 			},
-			expected: image.Cache{
+			expected: media.Cache{
 				Available:      true,
 				MaxAge:         -1,
 				NoCache:        true,
@@ -73,7 +73,7 @@ func TestParseCacheHeader(t *testing.T) {
 			header: http.Header{
 				"Cache-Control": []string{"no-cache, must-revalidate"},
 			},
-			expected: image.Cache{
+			expected: media.Cache{
 				Available:      true,
 				MaxAge:         -1,
 				NoCache:        true,
@@ -84,7 +84,7 @@ func TestParseCacheHeader(t *testing.T) {
 		{
 			name:   "No Cache-Control or Expires",
 			header: http.Header{},
-			expected: image.Cache{
+			expected: media.Cache{
 				Available:      false,
 				MaxAge:         -1,
 				Expires:        time.Time{},
@@ -98,7 +98,7 @@ func TestParseCacheHeader(t *testing.T) {
 			header: http.Header{
 				"Expires": []string{"Thu, 01 Jan 1970 00:00:00 GMT"},
 			},
-			expected: image.Cache{
+			expected: media.Cache{
 				Available:      true,
 				MaxAge:         -1,
 				Expires:        parseTime("Thu, 01 Jan 1970 00:00:00 GMT"),
@@ -112,7 +112,7 @@ func TestParseCacheHeader(t *testing.T) {
 			header: http.Header{
 				"Expires": []string{"Thu, 01 Jan 2030 00:00:00 GMT"},
 			},
-			expected: image.Cache{
+			expected: media.Cache{
 				Available:      true,
 				MaxAge:         -1,
 				Expires:        parseTime("Thu, 01 Jan 2030 00:00:00 GMT"),
@@ -126,7 +126,7 @@ func TestParseCacheHeader(t *testing.T) {
 			header: http.Header{
 				"Cache-Control": []string{"max-age=60"},
 			},
-			expected: image.Cache{
+			expected: media.Cache{
 				Available:      true,
 				MaxAge:         60,
 				NoCache:        false,
@@ -138,7 +138,7 @@ func TestParseCacheHeader(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			actual := image.ParseCacheHeader(tc.header)
+			actual := media.ParseCacheHeader(tc.header)
 			assert.Equal(t, tc.expected.Available, actual.Available, "Available mismatch")
 			assert.Equal(t, tc.expected.MaxAge, actual.MaxAge, "MaxAge mismatch")
 			assert.Equal(t, tc.expected.NoCache, actual.NoCache, "NoCache mismatch")

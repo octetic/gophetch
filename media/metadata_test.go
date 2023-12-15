@@ -1,4 +1,4 @@
-package image_test
+package media_test
 
 import (
 	"bytes"
@@ -9,7 +9,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
-	"github.com/octetic/gophetch/image"
+	"github.com/octetic/gophetch/media"
 )
 
 func TestFetchMetadataFromURL(t *testing.T) {
@@ -28,13 +28,13 @@ func TestFetchMetadataFromURL(t *testing.T) {
 	tests := []struct {
 		name        string
 		imgURL      string
-		expected    image.Metadata
+		expected    media.Metadata
 		expectedErr string
 	}{
 		{
 			name:   "valid image",
 			imgURL: server.URL,
-			expected: image.Metadata{
+			expected: media.Metadata{
 				Width:       50,
 				Height:      50,
 				ContentSize: int64(len(imgData["mark.png"])),
@@ -49,7 +49,7 @@ func TestFetchMetadataFromURL(t *testing.T) {
 		{
 			name:   "Place Kitten",
 			imgURL: "https://placekitten.com/g/2048/2048",
-			expected: image.Metadata{
+			expected: media.Metadata{
 				Width:       2048,
 				Height:      2048,
 				ContentSize: 0,
@@ -60,7 +60,7 @@ func TestFetchMetadataFromURL(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			metadata, err := image.FetchMetadataFromHeader(tt.imgURL, 512*1024)
+			metadata, err := media.FetchMetadataFromHeader(tt.imgURL, 512*1024)
 			if tt.expectedErr != "" {
 				assert.EqualError(t, err, tt.expectedErr)
 			} else {

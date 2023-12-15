@@ -1,4 +1,4 @@
-package image_test
+package media_test
 
 import (
 	"bytes"
@@ -9,7 +9,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
-	"github.com/octetic/gophetch/image"
+	"github.com/octetic/gophetch/media"
 )
 
 // assuming these functions are defined in the same package for simplicity
@@ -89,17 +89,17 @@ func TestContentTypeFunctions(t *testing.T) {
 			a := assert.New(t)
 
 			// Test IsValidImageContentType
-			a.Equal(tt.isValidImage, image.IsValidImageContentType(tt.contentType), "IsValidImageContentType mismatch")
+			a.Equal(tt.isValidImage, media.IsValidImageContentType(tt.contentType), "IsValidImageContentType mismatch")
 
 			// Test IsValidFaviconContentType
-			a.Equal(tt.isValidFavicon, image.IsValidFaviconContentType(tt.contentType), "IsValidFaviconContentType mismatch")
+			a.Equal(tt.isValidFavicon, media.IsValidFaviconContentType(tt.contentType), "IsValidFaviconContentType mismatch")
 
 			// Test ContentTypeByExtension
 			extToTest := tt.extension
 			if tt.extensionAlt != "" {
 				extToTest = tt.extensionAlt
 			}
-			contentType, err := image.ContentTypeByExtension(extToTest)
+			contentType, err := media.ContentTypeByExtension(extToTest)
 			if tt.isValidImage {
 				a.NoError(err, "ContentTypeByExtension should not return an error for valid extension")
 				a.Equal(tt.contentType, contentType, "ContentTypeByExtension mismatch")
@@ -108,7 +108,7 @@ func TestContentTypeFunctions(t *testing.T) {
 			}
 
 			// Test ExtensionByContentType
-			extension, err := image.ExtensionByContentType(tt.contentType)
+			extension, err := media.ExtensionByContentType(tt.contentType)
 			if tt.isValidImage {
 				a.NoError(err, "ExtensionByContentType should not return an error for valid content-type")
 				a.Equal(tt.extension, extension, "ExtensionByContentType mismatch")
@@ -162,7 +162,7 @@ func TestContentTypeFromURL(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			contentType, err := image.ContentTypeFromURL(tt.imgURL)
+			contentType, err := media.ContentTypeFromURL(tt.imgURL)
 			if tt.expectedErr != "" {
 				assert.EqualError(t, err, tt.expectedErr)
 			} else {

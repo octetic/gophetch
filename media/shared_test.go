@@ -1,4 +1,4 @@
-package image_test
+package media_test
 
 import (
 	"encoding/base64"

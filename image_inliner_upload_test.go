@@ -6,7 +6,7 @@ import (
 	"github.com/stretchr/testify/assert"
 
 	"github.com/octetic/gophetch"
-	"github.com/octetic/gophetch/image"
+	"github.com/octetic/gophetch/media"
 )
 
 func TestUploadStrategy(t *testing.T) {
@@ -35,7 +35,7 @@ func TestUploadStrategy(t *testing.T) {
 	}
 
 	mockFetcher := new(MockImageFetcher)
-	mockUploadFunc := func(img *image.Image) (string, error) {
+	mockUploadFunc := func(img *media.Media) (string, error) {
 		return "new_image_url.png", nil
 	}
 

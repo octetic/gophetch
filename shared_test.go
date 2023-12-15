@@ -9,27 +9,27 @@ import (
 
 	"github.com/stretchr/testify/mock"
 
-	"github.com/octetic/gophetch/image"
+	"github.com/octetic/gophetch/media"
 )
 
 // MockImageFetcher returns a mock image
 type MockImageFetcher struct{}
 
-func (m *MockImageFetcher) NewImageFromURL(url string, maxBytes int) (*image.Image, error) {
+func (m *MockImageFetcher) NewImageFromURL(url string, maxBytes int) (*media.Media, error) {
 	filename := strings.TrimPrefix(url, "https://example.com/")
 	imgBytes, err := os.ReadFile("testdata/" + filename)
 	if err != nil {
 		return nil, err
 	}
 
-	contentType, err := image.ContentTypeByExtension("." + strings.ToLower(filename[strings.LastIndex(filename, ".")+1:]))
+	contentType, err := media.ContentTypeByExtension("." + strings.ToLower(filename[strings.LastIndex(filename, ".")+1:]))
 	if err != nil {
 		return nil, err
 	}
 
-	return &image.Image{
+	return &media.Media{
 		Bytes: imgBytes,
-		Metadata: image.Metadata{
+		Metadata: media.Metadata{
 			ContentType: contentType,
 		},
 	}, nil
@@ -39,7 +39,7 @@ type MockImageFetcherHybrid struct {
 	mock.Mock
 }
 
-func (m *MockImageFetcherHybrid) NewImageFromURL(url string, maxSize int) (*image.Image, error) {
+func (m *MockImageFetcherHybrid) NewImageFromURL(url string, maxSize int) (*media.Media, error) {
 	//args := m.Called(url)
 	filename := strings.TrimPrefix(url, "https://example.com/")
 	imgBytes, err := os.ReadFile("testdata/" + filename)
@@ -47,14 +47,14 @@ func (m *MockImageFetcherHybrid) NewImageFromURL(url string, maxSize int) (*imag
 		return nil, err
 	}
 
-	contentType, err := image.ContentTypeByExtension("." + strings.ToLower(filename[strings.LastIndex(filename, ".")+1:]))
+	contentType, err := media.ContentTypeByExtension("." + strings.ToLower(filename[strings.LastIndex(filename, ".")+1:]))
 	if err != nil {
 		return nil, err
 	}
 
-	return &image.Image{
+	return &media.Media{
 		Bytes: imgBytes,
-		Metadata: image.Metadata{
+		Metadata: media.Metadata{
 			ContentType: contentType,
 			Width:       100,
 			Height:      100,
@@ -83,7 +83,7 @@ func SetupFiles() {
 		if err != nil {
 			log.Fatalf("Failed to read test image: %v", err)
 		}
-		contentType, err := image.ContentTypeByExtension("." + pathExt)
+		contentType, err := media.ContentTypeByExtension("." + pathExt)
 		if err != nil {
 			log.Fatalf("Failed to get content type: %v", err)
 		}

@@ -1,4 +1,4 @@
-package image_test
+package media_test
 
 import (
 	"bytes"
@@ -9,7 +9,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
-	"github.com/octetic/gophetch/image"
+	"github.com/octetic/gophetch/media"
 )
 
 func TestIsValidImage(t *testing.T) {
@@ -50,7 +50,7 @@ func TestIsValidImage(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			valid := image.IsValidImage(tt.imgURL)
+			valid := media.IsValidImage(tt.imgURL)
 			assert.Equal(t, tt.expected, valid)
 		})
 	}
@@ -91,7 +91,7 @@ func TestIsValidFavicon(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			valid := image.IsValidFavicon(tt.imgURL)
+			valid := media.IsValidFavicon(tt.imgURL)
 			assert.Equal(t, tt.expected, valid)
 		})
 	}

@@ -13,7 +13,7 @@ import (
 	"golang.org/x/net/html"
 
 	"github.com/octetic/gophetch/helpers"
-	"github.com/octetic/gophetch/image"
+	"github.com/octetic/gophetch/media"
 )
 
 // InlineStrategy represents the different strategies for inlining images.
@@ -55,22 +55,22 @@ const (
 
 // ImageFetcher is an interface for fetching images
 type ImageFetcher interface {
-	NewImageFromURL(url string, maxSize int) (*image.Image, error)
+	NewImageFromURL(url string, maxSize int) (*media.Media, error)
 }
 
 // RealImageFetcher uses the actual implementation
 type RealImageFetcher struct{}
 
 // NewImageFromURL fetches an image from the given URL.
-func (r *RealImageFetcher) NewImageFromURL(url string, maxSize int) (*image.Image, error) {
-	return image.NewImageFromURL(url, maxSize)
+func (r *RealImageFetcher) NewImageFromURL(url string, maxSize int) (*media.Media, error) {
+	return media.NewImageFromURL(url, maxSize)
 }
 
 // UploadFunc is the function signature to use for uploading images to cloud storage.
-type UploadFunc func(*image.Image) (string, error)
+type UploadFunc func(*media.Media) (string, error)
 
 // ShouldInlineFunc is the function signature use for determining whether an image should be inlined.
-type ShouldInlineFunc func(*image.Image) bool
+type ShouldInlineFunc func(*media.Media) bool
 
 // ImageInliner is responsible for fetching and replacing images in HTML documents.
 type ImageInliner struct {
@@ -133,7 +133,7 @@ func NewImageInliner(opts ImageInlinerOptions) *ImageInliner {
 	return &ImageInliner{
 		ShouldInline: func() ShouldInlineFunc {
 			if opts.ShouldInlineFunc == nil {
-				return func(img *image.Image) bool {
+				return func(img *media.Media) bool {
 					// Inline if image size is less than 100KB
 					if img.ContentSize < int64(inlinedSize) {
 						return true
@@ -155,7 +155,7 @@ func NewImageInliner(opts ImageInlinerOptions) *ImageInliner {
 		}(),
 		uploadFunc: func() UploadFunc {
 			if opts.UploadFunc == nil {
-				return func(img *image.Image) (string, error) {
+				return func(img *media.Media) (string, error) {
 					return "", fmt.Errorf("no upload function provided")
 				}
 			}

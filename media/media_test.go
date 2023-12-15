@@ -1,4 +1,4 @@
-package image_test
+package media_test
 
 import (
 	"bytes"
@@ -10,19 +10,19 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
-	"github.com/octetic/gophetch/image"
+	"github.com/octetic/gophetch/media"
 )
 
 func TestImageFromBytes(t *testing.T) {
 	tests := []struct {
 		name     string
 		data     []byte
-		expected image.Metadata
+		expected media.Metadata
 	}{
 		{
 			name: "valid bmp image",
 			data: imgData["mark.bmp"],
-			expected: image.Metadata{
+			expected: media.Metadata{
 				Width:       100,
 				Height:      100,
 				ContentSize: int64(len(imgData["mark.bmp"])),
@@ -32,7 +32,7 @@ func TestImageFromBytes(t *testing.T) {
 		{
 			name: "valid gif image",
 			data: imgData["mark.gif"],
-			expected: image.Metadata{
+			expected: media.Metadata{
 				Width:       100,
 				Height:      100,
 				ContentSize: int64(len(imgData["mark.gif"])),
@@ -42,7 +42,7 @@ func TestImageFromBytes(t *testing.T) {
 		{
 			name: "valid jpg image",
 			data: imgData["mark.jpg"],
-			expected: image.Metadata{
+			expected: media.Metadata{
 				Width:       100,
 				Height:      100,
 				ContentSize: int64(len(imgData["mark.jpg"])),
@@ -52,7 +52,7 @@ func TestImageFromBytes(t *testing.T) {
 		{
 			name: "valid png image",
 			data: imgData["mark.png"],
-			expected: image.Metadata{
+			expected: media.Metadata{
 				Width:       100,
 				Height:      100,
 				ContentSize: int64(len(imgData["mark.png"])),
@@ -62,7 +62,7 @@ func TestImageFromBytes(t *testing.T) {
 		{
 			name: "valid tiff image",
 			data: imgData["mark.tif"],
-			expected: image.Metadata{
+			expected: media.Metadata{
 				Width:       100,
 				Height:      100,
 				ContentSize: int64(len(imgData["mark.tif"])),
@@ -72,7 +72,7 @@ func TestImageFromBytes(t *testing.T) {
 		{
 			name: "valid webp image",
 			data: imgData["mark.webp"],
-			expected: image.Metadata{
+			expected: media.Metadata{
 				Width:       100,
 				Height:      100,
 				ContentSize: int64(len(imgData["mark.webp"])),
@@ -82,7 +82,7 @@ func TestImageFromBytes(t *testing.T) {
 		{
 			name: "valid favicon",
 			data: imgData["mark.ico"],
-			expected: image.Metadata{
+			expected: media.Metadata{
 				Width:       48,
 				Height:      48,
 				ContentSize: int64(len(imgData["mark.ico"])),
@@ -93,14 +93,14 @@ func TestImageFromBytes(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run("", func(t *testing.T) {
-			img, err := image.NewImageFromBytes(tt.data)
+			img, err := media.NewImageFromBytes(tt.data)
 			assert.NoError(t, err, tt.name+" error mismatch")
 			assert.Equal(t, tt.expected, img.Metadata, tt.name+" metadata mismatch")
 		})
 	}
 }
 
-func TestImageFromURL(t *testing.T) {
+func TestNewMediaFromURL(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if r.URL.Path == "/invalid" {
 			http.NotFound(w, r)
@@ -138,13 +138,13 @@ func TestImageFromURL(t *testing.T) {
 	tests := []struct {
 		name        string
 		imgURL      string
-		expected    image.Metadata
+		expected    media.Metadata
 		expectedErr string
 	}{
 		{
 			name:   "valid png image",
 			imgURL: server.URL,
-			expected: image.Metadata{
+			expected: media.Metadata{
 				Width:       100,
 				Height:      100,
 				ContentSize: int64(len(imgData["mark.png"])),
@@ -154,7 +154,7 @@ func TestImageFromURL(t *testing.T) {
 		{
 			name:   "valid jpeg image",
 			imgURL: server.URL + "/image.jpg",
-			expected: image.Metadata{
+			expected: media.Metadata{
 				Width:       100,
 				Height:      100,
 				ContentSize: int64(len(imgData["mark.jpg"])),
@@ -164,7 +164,7 @@ func TestImageFromURL(t *testing.T) {
 		{
 			name:   "valid webp image",
 			imgURL: server.URL + "/image.webb",
-			expected: image.Metadata{
+			expected: media.Metadata{
 				Width:       100,
 				Height:      100,
 				ContentSize: int64(len(imgData["mark.webp"])),
@@ -174,7 +174,7 @@ func TestImageFromURL(t *testing.T) {
 		{
 			name:   "valid favicon",
 			imgURL: server.URL + "/favicon.ico",
-			expected: image.Metadata{
+			expected: media.Metadata{
 				Width:       48,
 				Height:      48,
 				ContentSize: int64(len(imgData["mark.ico"])),
@@ -182,9 +182,19 @@ func TestImageFromURL(t *testing.T) {
 			},
 		},
 		{
+			name:   "valid svg",
+			imgURL: "https://upload.wikimedia.org/wikipedia/commons/0/02/SVG_logo.svg",
+			expected: media.Metadata{
+				Width:       0,
+				Height:      0,
+				ContentSize: 4019,
+				ContentType: "image/svg+xml",
+			},
+		},
+		{
 			name:        "invalid image",
 			imgURL:      server.URL + "/invalid",
-			expectedErr: "image: unknown format",
+			expectedErr: "unsupported media type: text/plain; charset=utf-8",
 		},
 		// Uncomment this test to test against a large, remote image
 		//{
@@ -201,11 +211,16 @@ func TestImageFromURL(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			img, err := image.NewImageFromURL(tt.imgURL, 0)
+			img, err := media.NewMediaFromURL(tt.imgURL, 0)
 			if tt.expectedErr != "" {
 				assert.EqualError(t, err, tt.expectedErr)
 			} else {
 				assert.NoError(t, err)
+
+				if img == nil {
+					t.Fatal("img is nil")
+				}
+
 				assert.Equal(t, tt.expected, img.Metadata)
 
 				// assert img is not nil and is of type image.Image
@@ -218,35 +233,35 @@ func TestImageFromURL(t *testing.T) {
 func TestGenerateUniqueFilename(t *testing.T) {
 	testCases := []struct {
 		name      string
-		image     image.Image
+		image     media.Media
 		nonEmpty  bool // Whether the returned filename should be non-empty
 		hasSuffix bool // Whether the filename should have the provided extension as suffix
 		suffix    string
 	}{
 		{
 			name:      "With URL and extension",
-			image:     image.Image{URL: "https://example.com/image.jpg", Extension: "jpg"},
+			image:     media.Media{URL: "https://example.com/image.jpg", Extension: "jpg"},
 			nonEmpty:  true,
 			hasSuffix: true,
 			suffix:    ".jpg",
 		},
 		{
 			name:      "With URL but no extension",
-			image:     image.Image{URL: "https://example.com/image", Extension: ""},
+			image:     media.Media{URL: "https://example.com/image", Extension: ""},
 			nonEmpty:  true,
 			hasSuffix: false,
 			suffix:    "",
 		},
 		{
 			name:      "Without URL but with extension",
-			image:     image.Image{URL: "", Extension: "jpg"},
+			image:     media.Media{URL: "", Extension: "jpg"},
 			nonEmpty:  true,
 			hasSuffix: true,
 			suffix:    ".jpg",
 		},
 		{
 			name:      "Without URL and extension",
-			image:     image.Image{URL: "", Extension: ""},
+			image:     media.Media{URL: "", Extension: ""},
 			nonEmpty:  true,
 			hasSuffix: false,
 			suffix:    "",
@@ -283,7 +298,7 @@ func TestGenerateUniqueFilename(t *testing.T) {
 	t.Run("Randomness", func(t *testing.T) {
 		filenames := make(map[string]bool)
 		for i := 0; i < 1000; i++ {
-			img := &image.Image{URL: "", Extension: ""}
+			img := &media.Media{URL: "", Extension: ""}
 			filename := img.GenerateUniqueFilename()
 			_, exists := filenames[filename]
 			assert.False(t, exists, "Filename should be unique")
@@ -347,7 +362,7 @@ func TestNewImageFromDataURI(t *testing.T) {
 			if tt.inputFile != "" {
 				base64Str, _ = ReadAndEncodeImage(tt.inputFile)
 			}
-			img, err := image.NewImageFromDataURI(base64Str)
+			img, err := media.NewImageFromDataURI(base64Str)
 			if tt.expectErr {
 				assert.Error(t, err)
 			} else {
@@ -407,7 +422,7 @@ func TestDataURIToBytes(t *testing.T) {
 					t.Fatalf("Error reading file: %v", err)
 				}
 			}
-			uriBytes, err := image.DataURIToBytes(base64Str)
+			uriBytes, err := media.DataURIToBytes(base64Str)
 			if tt.expectErr {
 				assert.Error(t, err)
 			} else {

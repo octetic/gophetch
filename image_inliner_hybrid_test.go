@@ -7,7 +7,7 @@ import (
 	"github.com/stretchr/testify/mock"
 
 	"github.com/octetic/gophetch"
-	"github.com/octetic/gophetch/image"
+	"github.com/octetic/gophetch/media"
 )
 
 func TestHybridStrategy(t *testing.T) {
@@ -19,7 +19,7 @@ func TestHybridStrategy(t *testing.T) {
 		expectedHTML   string
 		expectedFiles  []string
 		shouldInline   bool
-		mockFetchImage *image.Image
+		mockFetchImage *media.Media
 		mockFetchError error
 	}{
 		{
@@ -40,16 +40,16 @@ func TestHybridStrategy(t *testing.T) {
 			inputHTML:    `<img src="mark.png">`,
 			expectedHTML: `<html><head></head><body><img src="new_image_url.png"/></body></html>`,
 			shouldInline: false,
-			mockFetchImage: &image.Image{
+			mockFetchImage: &media.Media{
 				Bytes:    []byte("image data"),
-				Metadata: image.Metadata{ContentType: "image/png"},
+				Metadata: media.Metadata{ContentType: "image/png"},
 			},
 			mockFetchError: nil,
 		},
 		// Add more test cases if needed
 	}
 
-	mockUploadFunc := func(img *image.Image) (string, error) {
+	mockUploadFunc := func(img *media.Media) (string, error) {
 		return "new_image_url.png", nil
 	}
 
@@ -64,7 +64,7 @@ func TestHybridStrategy(t *testing.T) {
 				UploadFunc:     mockUploadFunc,
 				InlineStrategy: gophetch.InlineHybrid,
 			})
-			inliner.ShouldInline = func(img *image.Image) bool {
+			inliner.ShouldInline = func(img *media.Media) bool {
 				return tt.shouldInline
 			}
 
