@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"crypto/rand"
 	"crypto/sha1"
+	"crypto/sha256"
 	"encoding/base64"
 	"encoding/hex"
 	"errors"
@@ -121,6 +122,21 @@ func (i *Image) GenerateUniqueFilename() string {
 	return hashString
 }
 
+// GenerateCacheKey generates a cache key for the given URL
+func GenerateCacheKey(url string) string {
+	// Create a new hash.Hash object for SHA-256
+	hasher := sha256.New()
+
+	// Write the URL into the hasher
+	hasher.Write([]byte(url)) // Ignoring error for simplicity; Write on sha256 never returns an error
+
+	// Compute the SHA-256 checksum of the URL
+	sum := hasher.Sum(nil)
+
+	// Return the hexadecimal encoding of the checksum
+	return hex.EncodeToString(sum)
+}
+
 // NewImageFromBytes returns the image and metadata from the given bytes. It will attempt to get the ContentType, Width,
 // Height, Format, and ContentSize from the given bytes. If the metadata cannot be extracted, an error is returned.
 func NewImageFromBytes(data []byte) (*Image, error) {
@@ -150,32 +166,6 @@ func NewImageFromBytes(data []byte) (*Image, error) {
 		Image:     img,
 		Extension: extension,
 	}, nil
-}
-
-// NewImageFromURLOLD will download the image from the given URL and return the image and metadata. It will attempt to get the
-// ContentType, Width, Height, Format, and ContentSize from the downloaded bytes as well.
-func NewImageFromURLOLD(imgURL string) (*Image, error) {
-	resp, err := http.Get(imgURL)
-	if err != nil {
-		return nil, err
-	}
-	defer func(Body io.ReadCloser) {
-		_ = Body.Close()
-	}(resp.Body)
-
-	imgData, err := io.ReadAll(resp.Body)
-	if err != nil {
-		return nil, err
-	}
-
-	img, err := NewImageFromBytes(imgData)
-	if err != nil {
-		return nil, err
-	}
-
-	img.Cache = ParseCacheHeader(resp.Header)
-	img.URL = imgURL
-	return img, nil
 }
 
 // NewImageFromURL will download the image from the given URL and return the image and metadata, but only if it is within the MaxImageSize.

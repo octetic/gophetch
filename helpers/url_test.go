@@ -1,7 +1,6 @@
 package helpers_test
 
 import (
-	"net/url"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -41,8 +40,7 @@ func TestCleanURL(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			u, _ := url.Parse(tc.inputURL)
-			got := helpers.CleanURL(u)
+			got := helpers.CleanURL(tc.inputURL)
 			assert.Equal(t, tc.want, got)
 		})
 	}

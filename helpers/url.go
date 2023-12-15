@@ -39,13 +39,17 @@ func IsURLValid(u string) bool {
 }
 
 // CleanURL removes tracking parameters from the given URL.
-func CleanURL(u *url.URL) string {
-	return deleteParams(u, params).String()
+func CleanURL(u string) string {
+	return deleteParams(u, params)
 }
 
 // deleteParams removes multiple query parameters from the URL.
-func deleteParams(u *url.URL, keys []string) *url.URL {
-	values := u.Query()
+func deleteParams(u string, keys []string) string {
+	parsedURL, err := url.Parse(u)
+	if err != nil {
+		return u
+	}
+	values := parsedURL.Query()
 	changed := false
 
 	for _, key := range keys {
@@ -56,7 +60,7 @@ func deleteParams(u *url.URL, keys []string) *url.URL {
 	}
 
 	if changed {
-		u.RawQuery = values.Encode()
+		parsedURL.RawQuery = values.Encode()
 	}
-	return u
+	return parsedURL.String()
 }
