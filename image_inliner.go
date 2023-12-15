@@ -28,6 +28,9 @@ const (
 	// InlineHybrid indicates a hybrid approach to inlining images where images are inlined if they are smaller
 	// than the maxInlinedSize, maxWidth, and maxHeight options, and uploaded to cloud storage otherwise.
 	InlineHybrid
+
+	// InlinePrefixProxy indicates that all images should be inlined, but the URLs should be prefixed with the proxy URL.
+	InlinePrefixProxy
 )
 
 // SrcsetStrategy represents the different strategies for handling srcset attributes.
@@ -78,6 +81,7 @@ type ImageInliner struct {
 	maxInlinedSize int
 	maxWidth       int
 	maxHeight      int
+	prefixURL      string
 }
 
 // ImageInlinerOptions are options for creating a new ImageInliner.
@@ -102,6 +106,8 @@ type ImageInlinerOptions struct {
 	MaxWidth int
 	// MaxHeight is the maximum height in pixels for images to be processed in a hybrid strategy. Default is 600.
 	MaxHeight int
+	// PrefixURL is the URL to prefix to the image URLs when using the InlinePrefixProxy strategy.
+	PrefixURL string
 }
 
 // NewImageInliner creates a new ImageInliner with the given fetcher, upload function, and storage strategy.
@@ -118,6 +124,7 @@ func NewImageInliner(opts ImageInlinerOptions) *ImageInliner {
 	if opts.MaxHeight > 0 {
 		maxHeight = opts.MaxHeight
 	}
+
 	return &ImageInliner{
 		ShouldInline: func() ShouldInlineFunc {
 			if opts.ShouldInlineFunc == nil {
@@ -160,6 +167,7 @@ func NewImageInliner(opts ImageInlinerOptions) *ImageInliner {
 		maxInlinedSize: inlinedSize,
 		maxWidth:       maxWidth,
 		maxHeight:      maxHeight,
+		prefixURL:      opts.PrefixURL,
 	}
 }
 
@@ -202,6 +210,8 @@ func (inliner *ImageInliner) InlineImages(readableHTML string) (string, error) {
 					case InlineHybrid:
 						// Hybrid strategy
 						attr.Val = inliner.processHybrid(attr)
+					case InlinePrefixProxy:
+						attr.Val = inliner.prefixProxy(attr)
 					}
 				}
 			}
@@ -236,6 +246,26 @@ func (inliner *ImageInliner) fetchAndInline(attr *html.Attribute) string {
 		}
 		imgBase64 := base64.StdEncoding.EncodeToString(img.Bytes)
 		newURL := fmt.Sprintf("data:%s;base64,%s", img.ContentType, imgBase64)
+		if attr.Key == "srcset" && descriptors[i] != "" {
+			newURL += " " + descriptors[i]
+		}
+		newURLs = append(newURLs, newURL)
+	}
+
+	return strings.Join(newURLs, ", ")
+}
+
+// This strategy does not download an image. Instead, it prefixes the URL with the proxy URL.
+func (inliner *ImageInliner) prefixProxy(attr *html.Attribute) string {
+	urls, descriptors := inliner.parseSrcAndSrcset(attr)
+	if attr.Key == "srcset" {
+		urls, descriptors = inliner.selectSrcsetURL(urls, descriptors)
+	}
+
+	var newURLs []string
+
+	for i, url := range urls {
+		newURL := fmt.Sprintf("%s?url=%s", inliner.prefixURL, url)
 		if attr.Key == "srcset" && descriptors[i] != "" {
 			newURL += " " + descriptors[i]
 		}

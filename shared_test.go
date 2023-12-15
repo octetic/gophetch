@@ -15,7 +15,7 @@ import (
 // MockImageFetcher returns a mock image
 type MockImageFetcher struct{}
 
-func (m *MockImageFetcher) NewImageFromURL(url string) (*image.Image, error) {
+func (m *MockImageFetcher) NewImageFromURL(url string, maxBytes int) (*image.Image, error) {
 	filename := strings.TrimPrefix(url, "https://example.com/")
 	imgBytes, err := os.ReadFile("testdata/" + filename)
 	if err != nil {
@@ -39,7 +39,7 @@ type MockImageFetcherHybrid struct {
 	mock.Mock
 }
 
-func (m *MockImageFetcherHybrid) NewImageFromURL(url string) (*image.Image, error) {
+func (m *MockImageFetcherHybrid) NewImageFromURL(url string, maxSize int) (*image.Image, error) {
 	//args := m.Called(url)
 	filename := strings.TrimPrefix(url, "https://example.com/")
 	imgBytes, err := os.ReadFile("testdata/" + filename)
