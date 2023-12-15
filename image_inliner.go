@@ -29,8 +29,8 @@ const (
 	// than the maxInlinedSize, maxWidth, and maxHeight options, and uploaded to cloud storage otherwise.
 	InlineHybrid
 
-	// InlinePrefixProxy indicates that all images should be inlined, but the URLs should be prefixed with the proxy URL.
-	InlinePrefixProxy
+	// InlineMediaProxy indicates that all images should be inlined, but the URLs should be prefixed with the proxy URL.
+	InlineMediaProxy
 )
 
 // SrcsetStrategy represents the different strategies for handling srcset attributes.
@@ -81,7 +81,7 @@ type ImageInliner struct {
 	maxInlinedSize int
 	maxWidth       int
 	maxHeight      int
-	prefixURL      string
+	mediaProxyURL  string
 }
 
 // ImageInlinerOptions are options for creating a new ImageInliner.
@@ -106,8 +106,8 @@ type ImageInlinerOptions struct {
 	MaxWidth int
 	// MaxHeight is the maximum height in pixels for images to be processed in a hybrid strategy. Default is 600.
 	MaxHeight int
-	// PrefixURL is the URL to prefix to the image URLs when using the InlinePrefixProxy strategy.
-	PrefixURL string
+	// MediaProxyURL is the URL to prefix to the image URLs when using the InlineMediaProxy strategy.
+	MediaProxyURL string
 }
 
 // NewImageInliner creates a new ImageInliner with the given fetcher, upload function, and storage strategy.
@@ -167,7 +167,7 @@ func NewImageInliner(opts ImageInlinerOptions) *ImageInliner {
 		maxInlinedSize: inlinedSize,
 		maxWidth:       maxWidth,
 		maxHeight:      maxHeight,
-		prefixURL:      opts.PrefixURL,
+		mediaProxyURL:  opts.MediaProxyURL,
 	}
 }
 
@@ -210,7 +210,7 @@ func (inliner *ImageInliner) InlineImages(readableHTML string) (string, error) {
 					case InlineHybrid:
 						// Hybrid strategy
 						attr.Val = inliner.processHybrid(attr)
-					case InlinePrefixProxy:
+					case InlineMediaProxy:
 						attr.Val = inliner.prefixProxy(attr)
 					}
 				}
@@ -265,7 +265,7 @@ func (inliner *ImageInliner) prefixProxy(attr *html.Attribute) string {
 	var newURLs []string
 
 	for i, url := range urls {
-		newURL := fmt.Sprintf("%s?url=%s", inliner.prefixURL, url)
+		newURL := fmt.Sprintf("%s?url=%s", inliner.mediaProxyURL, url)
 		if attr.Key == "srcset" && descriptors[i] != "" {
 			newURL += " " + descriptors[i]
 		}

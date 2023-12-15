@@ -93,8 +93,8 @@ func TestPrefixStrategy(t *testing.T) {
 			mockFetcher := new(MockImageFetcher)
 			inliner := gophetch.NewImageInliner(gophetch.ImageInlinerOptions{
 				Fetcher:        mockFetcher,
-				InlineStrategy: gophetch.InlinePrefixProxy,
-				PrefixURL:      prefixProxy,
+				InlineStrategy: gophetch.InlineMediaProxy,
+				MediaProxyURL:  prefixProxy,
 				SrcsetStrategy: gophetch.SrcsetAllImages,
 			})
 
