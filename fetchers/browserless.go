@@ -6,6 +6,8 @@ import (
 	"io"
 	"net/http"
 	"net/url"
+
+	"github.com/octetic/gophetch/metadata"
 )
 
 const browserlessEndpoint = "https://chrome.browserless.io"
@@ -143,4 +145,12 @@ func (b *BrowserlessFetcher) makeBrowserlessRequest(path string, request interfa
 	}
 
 	return resp, resp.Body, nil
+}
+
+func (s *BrowserlessFetcher) HasMetadata() bool {
+	return false
+}
+
+func (s *BrowserlessFetcher) Metadata() metadata.Metadata {
+	return metadata.Metadata{}
 }
