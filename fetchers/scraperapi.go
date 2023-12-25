@@ -30,7 +30,7 @@ func (s *ScraperapiFetcher) Name() string {
 }
 
 func (s *ScraperapiFetcher) FetchHTML(targetURL string) (*http.Response, io.ReadCloser, error) {
-	fmt.Println("Fetching HTML from Scraperapi")
+	//fmt.Println("Fetching HTML from Scraperapi")
 	const endpoint = "https://api.scraperapi.com"
 
 	// Create the URL with the token in the query parameters

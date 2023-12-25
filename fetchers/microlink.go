@@ -63,7 +63,7 @@ func (m *MicrolinkFetcher) Name() string {
 }
 
 func (m *MicrolinkFetcher) FetchHTML(targetURL string) (*http.Response, io.ReadCloser, error) {
-	fmt.Println("Fetching HTML from Microlink")
+	//fmt.Println("Fetching HTML from Microlink")
 
 	// Create the URL with the token in the query parameters
 	u, err := url.Parse(endpoint)

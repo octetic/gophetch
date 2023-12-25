@@ -1,7 +1,6 @@
 package fetchers
 
 import (
-	"fmt"
 	"io"
 	"net/http"
 
@@ -17,7 +16,7 @@ func (s *StandardHTTPFetcher) Name() string {
 }
 
 func (s *StandardHTTPFetcher) FetchHTML(url string) (*http.Response, io.ReadCloser, error) {
-	fmt.Println("Fetching HTML from Standard HTTP")
+	//fmt.Println("Fetching HTML from Standard HTTP")
 
 	resp, err := http.Get(url)
 	if err != nil {

@@ -147,10 +147,10 @@ func (b *BrowserlessFetcher) makeBrowserlessRequest(path string, request interfa
 	return resp, resp.Body, nil
 }
 
-func (s *BrowserlessFetcher) HasMetadata() bool {
+func (b *BrowserlessFetcher) HasMetadata() bool {
 	return false
 }
 
-func (s *BrowserlessFetcher) Metadata() metadata.Metadata {
+func (b *BrowserlessFetcher) Metadata() metadata.Metadata {
 	return metadata.Metadata{}
 }

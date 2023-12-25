@@ -4,6 +4,7 @@ package gophetch
 import (
 	"fmt"
 	"io"
+	"log/slog"
 	"net/http"
 	"net/url"
 	"strings"
@@ -21,6 +22,7 @@ type Gophetch struct {
 	Extractor    *Extractor
 	Fetchers     []fetchers.HTMLFetcher
 	SiteRegistry map[string]sites.Site
+	Logger       *slog.Logger
 }
 
 // Result is the struct that encapsulates the extracted metadata, along with the response data.
@@ -44,7 +46,16 @@ func New(fetchers ...fetchers.HTMLFetcher) *Gophetch {
 		SiteRegistry: make(map[string]sites.Site),
 	}
 	g.RegisterSite(sites.YouTube{})
+
+	// Set a noop logger by default
+	g.Logger = slog.New(slog.NewTextHandler(io.Discard, nil))
+
 	return g
+}
+
+// SetLogger Adds a logger to the Gophetch instance
+func (g *Gophetch) SetLogger(logger *slog.Logger) {
+	g.Logger = logger
 }
 
 // ReadAndParse accepts two parameters: an io.Reader containing the HTML to be parsed, and a
@@ -102,12 +113,16 @@ func (g *Gophetch) FetchAndParse(targetURL string) (Result, error) {
 	var data metadata.Metadata
 	hasMetadata := false
 	for _, fetcher := range g.Fetchers {
+		g.Logger.Info("Fetching HTML from " + fetcher.Name())
 		resp, body, err = fetcher.FetchHTML(targetURL)
 		if err == nil {
 			data = fetcher.Metadata()
 			hasMetadata = fetcher.HasMetadata()
 			fetcherName = fetcher.Name()
+			g.Logger.Info("Fetched HTML from "+fetcher.Name(), slog.Int("status_code", resp.StatusCode))
 			break
+		} else {
+			g.Logger.Error("Error fetching HTML from "+fetcher.Name(), slog.String("error", err.Error()))
 		}
 	}
 

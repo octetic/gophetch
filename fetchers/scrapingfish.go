@@ -1,7 +1,6 @@
 package fetchers
 
 import (
-	"fmt"
 	"io"
 	"net/http"
 	"net/url"
@@ -20,7 +19,7 @@ func (s *ScrapingfishFetcher) Name() string {
 }
 
 func (s *ScrapingfishFetcher) FetchHTML(targetURL string) (*http.Response, io.ReadCloser, error) {
-	fmt.Println("Fetching HTML from Scrapingfish")
+	//fmt.Println("Fetching HTML from Scrapingfish")
 	const endpoint = "https://scraping.narf.ai/api/v1/"
 
 	// Create the URL with the token in the query parameters
