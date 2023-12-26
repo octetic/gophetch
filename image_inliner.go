@@ -201,7 +201,10 @@ func (inliner *ImageInliner) InlineImages(readableHTML string) (string, error) {
 				attr := &node.Attr[i]
 				if attr.Key == "src" || attr.Key == "srcset" || attr.Key == "poster" {
 					// If the image is already inlined, skip it
-					if strings.HasPrefix(attr.Val, "data:") {
+					if strings.HasPrefix(attr.Val, "data:") ||
+						strings.HasPrefix(attr.Val, "data%3A") ||
+						strings.HasPrefix(attr.Val, "blob:") ||
+						strings.HasPrefix(attr.Val, "blob%3A") {
 						continue
 					}
 

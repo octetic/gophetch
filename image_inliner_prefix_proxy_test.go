@@ -101,6 +101,15 @@ func TestPrefixStrategy(t *testing.T) {
 			<img srcset="` + prefixProxy + `?url=https://example.com/mark.png 1x, ` + prefixProxy + `?url=https://example.com/mark.webp 2x"/>
 			</body></html>`,
 		},
+		{
+			name: "data:image/png;base64 image",
+			inputHTML: `<html><head></head><body>
+			<img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+P+/HgAFhAJ/wr4H/wAAAABJRU5ErkJggg==">
+			</body></html>`,
+			expectedHTML: `<html><head></head><body>
+			<img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+P+/HgAFhAJ/wr4H/wAAAABJRU5ErkJggg=="/>
+			</body></html>`,
+		},
 	}
 
 	for _, tt := range tests {
