@@ -15,7 +15,16 @@ func TestPrefixStrategy(t *testing.T) {
 	relativeURL, err := url.Parse("https://example.com/foo/bar/baz")
 	assert.NoError(t, err)
 
-	prefixProxy := "https://example.art/proxy"
+	prefixProxy := "https://example.art/proxy/images"
+	// Create image examples as a hash map of URL to query escaped string
+	images := map[string]string{
+		"https://example.com/mark.jpg":  "https%3A%2F%2Fexample.com%2Fmark.jpg",
+		"https://example.com/mark.png":  "https%3A%2F%2Fexample.com%2Fmark.png",
+		"https://example.com/mark.webp": "https%3A%2F%2Fexample.com%2Fmark.webp",
+		"/mark.jpg":                     "https%3A%2F%2Fexample.com%2Ffoo%2Fbar%2Fmark.jpg",
+		"/mark.png":                     "https%3A%2F%2Fexample.com%2Ffoo%2Fbar%2Fmark.png",
+		"/mark.webp":                    "https%3A%2F%2Fexample.com%2Ffoo%2Fbar%2Fmark.webp",
+	}
 
 	tests := []struct {
 		name         string
@@ -33,13 +42,13 @@ func TestPrefixStrategy(t *testing.T) {
 		{
 			name:         "single src",
 			inputHTML:    `<html><head></head><body><img src="https://example.com/mark.jpg"></body></html>`,
-			expectedHTML: `<html><head></head><body><img src="` + prefixProxy + `?url=https://example.com/mark.jpg"/></body></html>`,
+			expectedHTML: `<html><head></head><body><img src="` + prefixProxy + `/` + images["https://example.com/mark.jpg"] + `"/></body></html>`,
 			expectError:  false,
 		},
 		{
 			name:         "srcset multiple sources",
 			inputHTML:    `<html><head></head><body><img srcset="https://example.com/mark.jpg 1x, https://example.com/mark.png 2x"></body></html>`,
-			expectedHTML: `<html><head></head><body><img srcset="` + prefixProxy + `?url=https://example.com/mark.jpg 1x, ` + prefixProxy + `?url=https://example.com/mark.png 2x"/></body></html>`,
+			expectedHTML: `<html><head></head><body><img srcset="` + prefixProxy + `/` + images["https://example.com/mark.jpg"] + ` 1x, ` + prefixProxy + `/` + images["https://example.com/mark.png"] + ` 2x"/></body></html>`,
 			expectError:  false,
 		},
 		{
@@ -49,8 +58,8 @@ func TestPrefixStrategy(t *testing.T) {
 			<img src="https://example.com/mark.png">
 			</body></html>`,
 			expectedHTML: `<html><head></head><body>
-			<img src="` + prefixProxy + `?url=https://example.com/mark.jpg"/>
-			<img src="` + prefixProxy + `?url=https://example.com/mark.png"/>
+			<img src="` + prefixProxy + `/` + images["https://example.com/mark.jpg"] + `"/>
+			<img src="` + prefixProxy + `/` + images["https://example.com/mark.png"] + `"/>
 			</body></html>`,
 		},
 		{
@@ -60,8 +69,8 @@ func TestPrefixStrategy(t *testing.T) {
 			<img srcset="https://example.com/mark.png 1x,https://example.com/mark.webp 2x">
 			</body></html>`,
 			expectedHTML: `<html><head></head><body>
-			<img src="` + prefixProxy + `?url=https://example.com/mark.jpg"/>
-			<img srcset="` + prefixProxy + `?url=https://example.com/mark.png 1x, ` + prefixProxy + `?url=https://example.com/mark.webp 2x"/>
+			<img src="` + prefixProxy + `/` + images["https://example.com/mark.jpg"] + `"/>
+			<img srcset="` + prefixProxy + `/` + images["https://example.com/mark.png"] + ` 1x, ` + prefixProxy + `/` + images["https://example.com/mark.webp"] + ` 2x"/>
 			</body></html>`,
 		},
 		{
@@ -71,8 +80,8 @@ func TestPrefixStrategy(t *testing.T) {
 			<img srcset="https://example.com/mark.png 1x,https://example.com/mark.webp 2x" sizes="(max-width: 600px) 200px, 50vw">
 			</body></html>`,
 			expectedHTML: `<html><head></head><body>
-			<img src="` + prefixProxy + `?url=https://example.com/mark.jpg"/>
-			<img srcset="` + prefixProxy + `?url=https://example.com/mark.png 1x, ` + prefixProxy + `?url=https://example.com/mark.webp 2x" sizes="(max-width: 600px) 200px, 50vw"/>
+			<img src="` + prefixProxy + `/` + images["https://example.com/mark.jpg"] + `"/>
+			<img srcset="` + prefixProxy + `/` + images["https://example.com/mark.png"] + ` 1x, ` + prefixProxy + `/` + images["https://example.com/mark.webp"] + ` 2x" sizes="(max-width: 600px) 200px, 50vw"/>
 			</body></html>`,
 		},
 		{
@@ -85,8 +94,8 @@ func TestPrefixStrategy(t *testing.T) {
 			</body></html>`,
 			expectedHTML: `<html><head></head><body>
 			<picture>
-				<source srcset="` + prefixProxy + `?url=https://example.com/mark.png 1x, ` + prefixProxy + `?url=https://example.com/mark.webp 2x" sizes="(max-width: 600px) 200px, 50vw"/>	
-				<img src="` + prefixProxy + `?url=https://example.com/mark.jpg"/>
+				<source srcset="` + prefixProxy + `/` + images["https://example.com/mark.png"] + ` 1x, ` + prefixProxy + `/` + images["https://example.com/mark.webp"] + ` 2x" sizes="(max-width: 600px) 200px, 50vw"/>	
+				<img src="` + prefixProxy + `/` + images["https://example.com/mark.jpg"] + `"/>
 			</picture>
 			</body></html>`,
 		},
@@ -97,8 +106,8 @@ func TestPrefixStrategy(t *testing.T) {
 			<img srcset="/mark.png 1x,/mark.webp 2x">
 			</body></html>`,
 			expectedHTML: `<html><head></head><body>
-			<img src="` + prefixProxy + `?url=https://example.com/mark.jpg"/>
-			<img srcset="` + prefixProxy + `?url=https://example.com/mark.png 1x, ` + prefixProxy + `?url=https://example.com/mark.webp 2x"/>
+			<img src="` + prefixProxy + `/` + images["https://example.com/mark.jpg"] + `"/>
+			<img srcset="` + prefixProxy + `/` + images["https://example.com/mark.png"] + ` 1x, ` + prefixProxy + `/` + images["https://example.com/mark.webp"] + ` 2x"/>
 			</body></html>`,
 		},
 		{

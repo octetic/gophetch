@@ -278,7 +278,14 @@ func (inliner *ImageInliner) prefixProxy(attr *html.Attribute) string {
 			u = helpers.FixRelativePath(inliner.relativeURL, u)
 		}
 
-		newURL := fmt.Sprintf("%s?url=%s", inliner.mediaProxyURL, u)
+		qryURL := url.QueryEscape(u)
+		// if the mediaProxyURL already has an ending slash, remove it
+		if strings.HasSuffix(inliner.mediaProxyURL, "/") {
+			inliner.mediaProxyURL = inliner.mediaProxyURL[:len(inliner.mediaProxyURL)-1]
+		}
+
+		newURL := fmt.Sprintf("%s/%s", inliner.mediaProxyURL, qryURL)
+
 		if attr.Key == "srcset" && descriptors[i] != "" {
 			newURL += " " + descriptors[i]
 		}
